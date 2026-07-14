@@ -35,6 +35,9 @@
 		{
 			"binding": "R2",
 			"bucket_name": "cloudflare-payload-r2",
+			// Permite que ferramentas com remoteBindings (ex.: `pnpm sync:local`) acessem
+			// o bucket remoto. Não afeta `pnpm dev`/build, que usam remoteBindings:false.
+			"remote": true,
 		},
  
 		// Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"

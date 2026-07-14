@@ -25,6 +25,8 @@ import * as migration_20260527_124345_add_seo_meta_fields from './20260527_12434
 import * as migration_20260603_add_2fa_fields from './20260603_add_2fa_fields';
 import * as migration_20260615_141615_add_posts_fts from './20260615_141615_add_posts_fts';
 import * as migration_20260622_add_post_banner from './20260622_add_post_banner';
+import * as migration_20260711_160459_localize_latest_blocks from './20260711_160459_localize_latest_blocks';
+import * as migration_20260711_225019_pullquote_body from './20260711_225019_pullquote_body';
 
 export const migrations = [
   {
@@ -155,11 +157,21 @@ export const migrations = [
   {
     up: migration_20260615_141615_add_posts_fts.up,
     down: migration_20260615_141615_add_posts_fts.down,
-    name: '20260615_141615_add_posts_fts'
+    name: '20260615_141615_add_posts_fts',
   },
   {
     up: migration_20260622_add_post_banner.up,
     down: migration_20260622_add_post_banner.down,
     name: '20260622_add_post_banner',
+  },
+  {
+    up: migration_20260711_160459_localize_latest_blocks.up,
+    down: migration_20260711_160459_localize_latest_blocks.down,
+    name: '20260711_160459_localize_latest_blocks',
+  },
+  {
+    up: migration_20260711_225019_pullquote_body.up,
+    down: migration_20260711_225019_pullquote_body.down,
+    name: '20260711_225019_pullquote_body'
   },
 ];

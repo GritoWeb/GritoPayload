@@ -11,12 +11,14 @@ export const LatestPortfolios: Block = {
       name: 'eyebrow',
       label: 'Eyebrow',
       type: 'text',
+      localized: true,
       defaultValue: 'Portfólio',
     },
     {
       name: 'title',
       label: 'Title',
       type: 'text',
+      localized: true,
       defaultValue: '*Últimos projetos* que entregamos',
       admin: { description: 'Use *word* for orange. Use \\n for line break.' },
     },
@@ -25,6 +27,7 @@ export const LatestPortfolios: Block = {
       name: 'buttonLabel',
       label: 'Button — text',
       type: 'text',
+      localized: true,
       defaultValue: 'Ver portfólio completo',
     },
     {

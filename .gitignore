@@ -52,3 +52,7 @@ node_modules/
 # OpenNext
 .open-next
 .wrangler
+.wrangler.bak*
+
+# SQL dumps (may contain sensitive data)
+*.sql

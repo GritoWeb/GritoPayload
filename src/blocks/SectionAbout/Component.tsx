@@ -20,6 +20,13 @@ export const SectionAboutComponent: React.FC<SectionAboutBlock> = ({
 }) => {
   const media = image as Media
 
+  // O corpo vem do CMS como textarea: a linha em branco separa parágrafos. Sem isto o
+  // \n\n é colapsado pelo HTML e dois ou três parágrafos viram um bloco corrido.
+  const paragraphs = (description ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+
   return (
     <div className="animate-fade-in">
       <AboutSplit
@@ -43,7 +50,11 @@ export const SectionAboutComponent: React.FC<SectionAboutBlock> = ({
         >
           {parseTitle(title)}
         </h2>
-        <p className="body-text mt-4 text-ink-soft">{description}</p>
+        {paragraphs.map((paragraph, i) => (
+          <p key={i} className="body-text mt-4 text-ink-soft">
+            {paragraph}
+          </p>
+        ))}
         <AboutFeatures
           items={(features ?? []).map((f) => ({ title: f.title, description: f.description }))}
           className="mt-7"

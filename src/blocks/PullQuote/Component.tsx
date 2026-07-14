@@ -11,16 +11,53 @@ function initials(name = '') {
     .join('')
 }
 
-export const PullQuoteComponent: React.FC<PullQuoteBlock> = ({ eyebrow, quote, author, role }) => {
+/** Tipografia da citação — os parágrafos do corpo usam exatamente a mesma. */
+const quoteType = 'font-display font-light text-[28px] leading-tight text-ink tracking-tight'
+
+/**
+ * Acima disso a citação não cabe em uma linha no container (max-w-6xl = 1152px, a ~14px
+ * por caractere nesta fonte). Forçar `whitespace-nowrap` numa frase mais longa que isto
+ * estoura o viewport e gera rolagem horizontal — foi o que aconteceu em /servicos.
+ */
+const ONE_LINE_MAX_CHARS = 80
+
+export const PullQuoteComponent: React.FC<PullQuoteBlock> = ({
+  eyebrow,
+  quote,
+  body,
+  author,
+  role,
+}) => {
+  const paragraphs = (body ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+
+  // Citação curta: uma linha só no desktop. Citação longa: quebra normalmente, na
+  // largura de leitura, sem nunca ultrapassar o container.
+  const fitsOneLine = (quote ?? '').length <= ONE_LINE_MAX_CHARS
+
   return (
     <section aria-label="Depoimento em destaque" className="bg-white border-y border-line px-5 section-y">
-      <div className="max-w-3xl mx-auto text-center relative">
+      {/* Largo o bastante para a citação curta caber em uma linha no desktop; o resto do
+          conteúdo continua centralizado na largura de leitura (max-w-3xl). */}
+      <div className="max-w-6xl mx-auto text-center relative">
         <Sparkle size={32} color="#1A5EAB" className="absolute top-0 left-0 opacity-25" />
         <Sparkle size={24} color="#FE9D2B" className="absolute bottom-0 right-0 opacity-25" />
         {eyebrow && <p className="font-eyebrow m-0 mb-7">{eyebrow}</p>}
-        <p className="m-0 max-w-3xl mx-auto font-display font-light text-[28px] leading-snug text-ink tracking-tight">
-          &ldquo;{quote}&rdquo;
+        {/* text-balance evita a palavra órfã sempre que a frase quebra em mais de uma linha. */}
+        <p
+          className={`m-0 mx-auto max-w-3xl text-balance ${
+            fitsOneLine ? 'xl:max-w-none xl:whitespace-nowrap' : ''
+          } ${quoteType}`}
+        >
+          {quote}
         </p>
+        {paragraphs.map((paragraph, i) => (
+          <p key={i} className={`mb-0 mt-3 max-w-3xl mx-auto text-balance ${quoteType}`}>
+            {paragraph}
+          </p>
+        ))}
         {(author || role) && (
           <div className="mt-8 flex items-center justify-center gap-3.5">
             {author && (

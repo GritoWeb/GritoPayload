@@ -565,6 +565,10 @@ export interface ChecklistGridBlock {
 export interface PullQuoteBlock {
   eyebrow?: string | null;
   quote: string;
+  /**
+   * Paragraphs below the quote. Leave a blank line between paragraphs.
+   */
+  body?: string | null;
   author?: string | null;
   role?: string | null;
   id?: string | null;
@@ -1388,6 +1392,7 @@ export interface ChecklistGridBlockSelect<T extends boolean = true> {
 export interface PullQuoteBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   quote?: T;
+  body?: T;
   author?: T;
   role?: T;
   id?: T;

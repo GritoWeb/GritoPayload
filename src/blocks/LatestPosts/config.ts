@@ -11,12 +11,14 @@ export const LatestPosts: Block = {
       name: 'eyebrow',
       label: 'Eyebrow',
       type: 'text',
+      localized: true,
       defaultValue: 'Blog',
     },
     {
       name: 'title',
       label: 'Title',
       type: 'text',
+      localized: true,
       defaultValue: '*Últimos posts* do blog',
       admin: { description: 'Use *word* for orange. Use \\n for line break.' },
     },
@@ -25,6 +27,7 @@ export const LatestPosts: Block = {
       name: 'buttonLabel',
       label: 'Button — text',
       type: 'text',
+      localized: true,
       defaultValue: 'Ver todos os posts',
     },
     {

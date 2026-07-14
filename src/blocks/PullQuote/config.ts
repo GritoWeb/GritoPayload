@@ -21,6 +21,15 @@ export const PullQuote: Block = {
       required: true,
     },
     {
+      name: 'body',
+      label: 'Body (optional)',
+      type: 'textarea',
+      localized: true,
+      admin: {
+        description: 'Paragraphs below the quote. Leave a blank line between paragraphs.',
+      },
+    },
+    {
       name: 'author',
       label: 'Author name',
       type: 'text',
