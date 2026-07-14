@@ -70,18 +70,9 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
+    "pnpm": "^9 || ^10 || ^11"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ],
-    "ignoredBuiltDependencies": [
-      "workerd"
-    ]
-  },
+  "packageManager": "pnpm@11.12.0",
   "cloudflare": {
     "bindings": {
       "PAYLOAD_SECRET": {
