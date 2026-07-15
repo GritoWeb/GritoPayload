@@ -24,15 +24,21 @@ import { CHANNELS, PLACEHOLDER_IMAGE, STATS } from './_placeholders'
 const PASSTHROUGH_BLOCKS = ['homeSectionTestimonials'] as const
 
 // ── Seção 1 — Hero ───────────────────────────────────────────────────────────
-// Hero conceitual: o eyebrow deixou de citar WordPress de propósito.
+// Revisão de copy 2026-07-14. Três decisões que quebram as regras antigas do
+// 01-voz-do-site.md (o doc foi atualizado junto):
+//  - SEM eyebrow. Na pesquisa de referências, eyebrow é minoria e nunca é menu de serviço.
+//    O HeroSection só renderiza o <p> se houver valor, então string vazia basta.
+//  - O tempo de casa subiu para o H1 (o molde antigo mandava credibilidade para o apoio).
+//    Nenhuma agência brasileira da pesquisa ocupa esse espaço.
+//  - O H1 anterior ("o seu negócio crescer") saiu pelo duplo sentido.
 const hero = {
   pt: {
     type: 'defaultHero',
-    eyebrow: 'Sites · E-commerce · Sistemas',
-    heroTitle: 'Desenvolvimento web feito para\no seu negócio *crescer*.',
+    eyebrow: '',
+    heroTitle: 'Desenvolvimento de sites e sistemas sob medida, *há mais de 15 anos.*',
     titleMaxWidth: 'none',
     heroDescription:
-      'Mais de 15 anos desenvolvendo sites e sistemas para clientes no Brasil e nos Estados Unidos. Performance, segurança e responsabilidade em cada projeto.',
+      'Soluções escaláveis que sustentam a operação de empresas no Brasil e nos Estados Unidos. Performance e segurança em cada projeto.',
     cta1Label: 'Fale com a GritoWeb',
     cta1Href: '/contato',
     cta2Label: 'Ver serviços',
@@ -40,11 +46,11 @@ const hero = {
   },
   en: {
     type: 'defaultHero',
-    eyebrow: 'Websites · E-commerce · Systems',
-    heroTitle: 'Web development built to\n*grow* your business.',
+    eyebrow: '',
+    heroTitle: 'Building custom websites and systems for *more than 15 years.*',
     titleMaxWidth: 'none',
     heroDescription:
-      'More than 15 years building websites and systems for clients in Brazil and the United States. Performance, security, and accountability on every project.',
+      'Scalable solutions that keep businesses running, in Brazil and the United States. Performance and security on every project.',
     cta1Label: 'Talk to GritoWeb',
     cta1Href: '/contato',
     cta2Label: 'See services',
@@ -139,14 +145,22 @@ const why = {
 // Seção "sobre" única da home: absorveu a antiga "O que sustenta o trabalho". Os
 // mini-cards viram as `features`. Os links dos mini-cards (/servicos, /agencias) não
 // têm campo na linha de feature e ficaram de fora.
+//
+// Revisão de copy 2026-07-14:
+//  - "estúdio" → "agência" (decisão do Richard; também é o termo que o público busca).
+//  - WordPress passa a ser nomeado como ESPECIALIDADE aqui. Continua fora do hero: a regra
+//    "ferramenta fora" virou regra só da porta de entrada, não da página inteira.
+//  - "aplicações sob medida", nunca "mobile": a experiência em mobile é menor.
+//  - "O padrão de trabalho é o mesmo em todos" existe para que grandes marcas e governo
+//    soem como PROVA DE PADRÃO e não como filtro de cliente. Médio porte é público-alvo.
 const whoWeAre = {
   pt: {
     blockType: 'homeSectionAbout',
     eyebrow: 'Quem somos',
-    title: 'Um time técnico para\n*empresas e agências*.',
+    title: 'Um time técnico para *empresas e agências.*',
     titleMaxWidth: 'none',
     description:
-      'A GritoWeb é um estúdio de desenvolvimento web. Há mais de 15 anos entregamos sites e sistemas para empresas e agências, do site institucional ao sistema de missão crítica, no Brasil e nos Estados Unidos.\n\nO nosso maior cuidado está no que não aparece: código limpo, segurança e manutenção. É o que faz um projeto durar.',
+      'A GritoWeb é uma agência de desenvolvimento web. Somos especialistas em WordPress e em aplicações sob medida, com experiência que vai de empresas em crescimento a grandes marcas e órgãos governamentais. O padrão de trabalho é o mesmo em todos.\n\nTrabalhamos com padrões de qualidade rigorosos, porque o produto precisa resolver um problema real, não apenas parecer bonito na entrega. Segurança e robustez não são negociáveis: desenvolvemos soluções duradouras, que exigem pouca manutenção.',
     ctaLabel: 'Conheça a GritoWeb',
     ctaHref: '/sobre',
     image: PLACEHOLDER_IMAGE,
@@ -166,10 +180,10 @@ const whoWeAre = {
   en: {
     blockType: 'homeSectionAbout',
     eyebrow: 'Who we are',
-    title: 'A technical team for\n*businesses and agencies*.',
+    title: 'A technical team for *businesses and agencies.*',
     titleMaxWidth: 'none',
     description:
-      "GritoWeb is a web development studio. For more than 15 years we've delivered websites and systems for businesses and agencies, from the institutional site to the mission-critical system, in Brazil and the United States.\n\nOur greatest care goes to what doesn't show: clean code, security, and maintenance. That's what makes a project last.",
+      'GritoWeb is a web development agency. We specialize in WordPress and in custom applications, with experience ranging from growing businesses to major brands and government bodies. The standard of work is the same for all of them.\n\nWe work to rigorous quality standards, because the product has to solve a real problem, not just look good on delivery day. Security and robustness are not negotiable: we build lasting solutions that require little maintenance.',
     ctaLabel: 'About GritoWeb',
     ctaHref: '/sobre',
     image: PLACEHOLDER_IMAGE,
