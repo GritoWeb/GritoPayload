@@ -22,8 +22,8 @@ export function HeroSection({
   const hasMedia = !!media
   const root = ['relative px-5 py-16', className].filter(Boolean).join(' ')
   const inner = hasMedia
-    ? 'max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1.1fr_1fr] items-center gap-12'
-    : 'max-w-7xl mx-auto'
+    ? 'container grid grid-cols-1 md:grid-cols-[1.1fr_1fr] items-center gap-12'
+    : 'container'
   const titleClasses = ['m-0 text-blue', titleClassName].filter(Boolean).join(' ')
 
   return (

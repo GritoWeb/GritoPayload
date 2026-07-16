@@ -4,6 +4,14 @@
    Reference: gritoweb-projeto/pages/styleguide.jsx. */
 
 @theme {
+  /* ── Breakpoints ───────────────────────────────────────── */
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 86rem;
+
   /* ── Colors — brand ────────────────────────────────────── */
 
   --color-blue: #1A5EAB;
@@ -103,3 +111,13 @@
   --shadow-1: 0 2px 6px rgba(40, 40, 40, 0.04), 0 1px 2px rgba(40, 40, 40, 0.04);
   --shadow-2: 0 12px 32px rgba(40, 40, 40, 0.08), 0 4px 12px rgba(40, 40, 40, 0.04);
 }
+
+/* Variants derived from the tokens above — declared here to sit next to the
+   breakpoints they consume. */
+
+@custom-variant dark (&:is([data-theme='dark'] *));
+@custom-variant sm (@media (width >= theme(--breakpoint-sm)));
+@custom-variant md (@media (width >= theme(--breakpoint-md)));
+@custom-variant lg (@media (width >= theme(--breakpoint-lg)));
+@custom-variant xl (@media (width >= theme(--breakpoint-xl)));
+@custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));

@@ -4,6 +4,7 @@ import React, { useState, useId, Children, cloneElement, isValidElement } from '
 import type { ContactSectionBlock } from '@/payload-types'
 import { ArrowIcon } from '@/components/ui/ArrowIcon'
 import { Button } from '@/components/Button'
+import { parseTitle } from '@/utilities/parseTitle'
 import { submitContact } from './actions'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ function IconBadge({ children, className = '' }: { children: React.ReactNode; cl
       className={[
         'inline-flex items-center justify-center shrink-0',
         'h-10 w-10 rounded-xl',
-        'bg-blue/10 text-blue',
+        'bg-orange/15 text-orange',
         className,
       ]
         .filter(Boolean)
@@ -227,7 +228,7 @@ export const ContactSectionComponent: React.FC<ContactSectionBlock> = ({
       {(eyebrow || heading) && (
         <div className="max-w-5xl mx-auto mb-14">
           {eyebrow && <p className="font-eyebrow m-0 mb-3">{eyebrow}</p>}
-          {heading && <h2 className="m-0 text-h2 font-bold text-ink">{heading}</h2>}
+          {heading && <h2 className="m-0 text-blue">{parseTitle(heading)}</h2>}
         </div>
       )}
 
@@ -284,10 +285,7 @@ export const ContactSectionComponent: React.FC<ContactSectionBlock> = ({
                 />
               </FormField>
 
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-3.5">
-                <p className="m-0 text-[13px] text-ink-soft">
-                  Seus dados são usados apenas para retorno.
-                </p>
+              <div className="mt-2 flex flex-wrap items-center justify-end gap-3.5">
                 <Button type="submit" icon={<ArrowIcon size={24} />} disabled={loading}>
                   {loading ? 'Enviando…' : 'Enviar mensagem'}
                 </Button>

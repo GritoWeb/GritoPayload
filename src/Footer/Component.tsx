@@ -123,7 +123,7 @@ export async function FooterComponent({ locale = 'pt' }: { locale?: string }) {
 
   return (
     <footer className="bg-blue text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-6 pt-18 pb-7">
+      <div className="container px-6 pt-18 pb-7">
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 items-start">
           <div>
             <div>

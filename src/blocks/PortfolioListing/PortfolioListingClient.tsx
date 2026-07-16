@@ -297,7 +297,7 @@ export const PortfolioListingClient: React.FC<PortfolioListingClientProps> = ({
 
   return (
     <section className="px-5 py-20">
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         {/* Header */}
         <div className="mb-10">
           {eyebrow && <p className="font-eyebrow m-0 mb-3">{eyebrow}</p>}

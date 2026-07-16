@@ -3,6 +3,7 @@
 import React from 'react'
 import { Splide, SplideSlide } from '@splidejs/react-splide'
 import '@splidejs/react-splide/css/core'
+import './testimonials.css'
 import { TestimonialCard } from '@/components/ui/TestimonialCard'
 
 type TestimonialItem = {

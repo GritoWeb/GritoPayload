@@ -51,7 +51,7 @@ export const SectionProjectsComponent: React.FC<SectionProjectsBlock> = ({
 }) => {
   return (
     <section className="bg-white border-y border-line px-5 section-y">
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         <div className="flex items-end justify-between flex-wrap gap-6 mb-9">
           <SectionTitle
             eyebrow={eyebrow}

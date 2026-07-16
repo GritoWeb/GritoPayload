@@ -99,14 +99,14 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
     <>
       {/* ── Breadcrumb ──────────────────────────────────────────────── */}
       <div className="px-5 pt-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="container">
           <Breadcrumb items={breadcrumbItems} />
         </div>
       </div>
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <section className="px-5 py-10 md:py-14">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1.25fr_1fr] gap-12 md:gap-16 items-center">
+        <div className="container grid grid-cols-1 md:grid-cols-[1.25fr_1fr] gap-12 md:gap-16 items-center">
           <div>
             <div className="flex flex-wrap gap-2 mb-4">
               {tag && (
@@ -163,7 +163,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Meta strip ──────────────────────────────────────────────── */}
       {metaItems.length > 0 && (
         <div className="px-5 pb-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <MetaStrip items={metaItems.slice(0, 4)} />
           </div>
         </div>
@@ -172,7 +172,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Desafio ─────────────────────────────────────────────────── */}
       {(p.challengeTitle || p.challengeBody) && (
         <section className="px-5 py-16">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
+          <div className="container grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
             <div>
               <p className="font-eyebrow m-0 mb-3">O desafio</p>
               {p.challengeTitle && (
@@ -193,7 +193,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Processo ────────────────────────────────────────────────── */}
       {p.processSteps && p.processSteps.length > 0 && (
         <section className="bg-white border-y border-line px-5 py-16">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <div className="mb-10">
               <p className="font-eyebrow text-orange m-0 mb-3">Processo</p>
               <h2 className="m-0 text-blue">Como fizemos</h2>
@@ -222,7 +222,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Galeria ──────────────────────────────────────────────────── */}
       {galleryItems.length > 0 && (
         <section className="px-5 py-16">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
               <div>
                 <p className="font-eyebrow m-0 mb-3">Galeria</p>
@@ -251,7 +251,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Resultados ───────────────────────────────────────────────── */}
       {p.stats && p.stats.length > 0 && (
         <section className="px-5 py-16">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <div className="mb-8">
               <p className="font-eyebrow m-0 mb-3">Resultados</p>
               <h2 className="m-0 text-blue">O que <span className="text-orange">aconteceu</span> depois</h2>
@@ -263,8 +263,8 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
 
       {/* ── Equipe & Stack ───────────────────────────────────────────── */}
       {((p.team && p.team.length > 0) || (p.stack && p.stack.length > 0)) && (
-        <section className="px-5 pb-16">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        <section className="px-5 py-13">
+          <div className="container grid grid-cols-1 md:grid-cols-2 gap-12">
             {p.team && p.team.length > 0 && (
               <div>
                 <p className="font-eyebrow m-0 mb-3">Equipe</p>
@@ -283,8 +283,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
               </div>
             )}
             {p.stack && p.stack.length > 0 && (
-              <div>
-                <p className="font-eyebrow m-0 mb-3">Ferramental</p>
+              <div className="md:col-span-2">
                 <h3 className="m-0 mb-5 text-2xl font-bold">Stack</h3>
                 <div className="flex flex-wrap gap-2">
                   {p.stack.map((item) => (
@@ -305,7 +304,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
       {/* ── Projetos relacionados ─────────────────────────────────────── */}
       {relatedPortfolios.length > 0 && (
         <section className="bg-white border-t border-line px-5 py-16">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
               <div>
                 <p className="font-eyebrow m-0 mb-3">Continue navegando</p>

@@ -185,7 +185,7 @@ export default async function PostPage({ params: paramsPromise }: Args) {
       {/* ── Posts relacionados ───────────────────────────────────────── */}
       {relatedPosts.length > 0 && (
         <section className="bg-white border-t border-line px-5 py-16">
-          <div className="max-w-7xl mx-auto">
+          <div className="container">
             <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
               <div>
                 <p className="font-eyebrow m-0 mb-3">Continue lendo</p>

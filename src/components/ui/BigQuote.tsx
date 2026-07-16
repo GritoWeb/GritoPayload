@@ -11,7 +11,7 @@ export function BigQuote({
   role?: string | null
 }) {
   return (
-    <figure className="relative bg-blue text-white rounded-[32px] p-10 md:p-14 overflow-hidden max-w-7xl mx-auto">
+    <figure className="relative bg-blue text-white rounded-[32px] p-10 md:p-14 overflow-hidden container">
       <span aria-hidden="true" className="block font-serif text-orange text-[120px] leading-[0.6]">
         &ldquo;
       </span>

@@ -12,7 +12,7 @@ export function LogoCloud({ eyebrow, title, titleClassName = '', description, it
   const titleClasses = ['m-0 text-blue mx-auto', titleClassName].filter(Boolean).join(' ')
   return (
     <section className="px-5 section-y bg-white border-y border-line">
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         <div className="text-center mb-10">
           {eyebrow && <p className="font-eyebrow m-0 mb-3">{eyebrow}</p>}
           {title && <h2 className={titleClasses}>{title}</h2>}

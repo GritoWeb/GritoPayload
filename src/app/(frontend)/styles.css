@@ -1,81 +1,23 @@
+/* Frontend CSS entry point.
+   This file only orchestrates imports — do not write rules here.
+   Where things live:
+     variables.css  → design tokens (@theme) and @custom-variant
+     base.css       → HTML element defaults
+     typography.css → typography classes
+     utilities.css  → project-owned utilities (@utility)
+     animations.css → @keyframes and animation classes
+   Block-specific CSS lives next to the block (see
+   blocks/SectionTestimonials/testimonials.css). */
+
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is([data-theme='dark'] *));
-@custom-variant sm (@media (width >= theme(--breakpoint-sm)));
-@custom-variant md (@media (width >= theme(--breakpoint-md)));
-@custom-variant lg (@media (width >= theme(--breakpoint-lg)));
-@custom-variant xl (@media (width >= theme(--breakpoint-xl)));
-@custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
-
-@theme {
-  --breakpoint-sm: 40rem;
-  --breakpoint-md: 48rem;
-  --breakpoint-lg: 64rem;
-  --breakpoint-xl: 80rem;
-  --breakpoint-2xl: 86rem;
-}
+@plugin "@tailwindcss/typography";
 
 @import './styles/variables.css';
 @import './styles/base.css';
 @import './styles/typography.css';
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@utility animate-fade-in {
-  animation: fade-in 0.6s ease both;
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-}
-
-/* Espaçamento vertical padrão das seções/blocos (mobile → desktop) */
-@utility section-y {
-  @apply py-16 lg:py-24;
-}
-
-/* Imagens de conteúdo: fade-in ao entrar na viewport (ver FadeInImage) */
-@media (prefers-reduced-motion: no-preference) {
-  .fade-in-img {
-    opacity: 0;
-    transition: opacity 0.7s ease;
-  }
-  .fade-in-img.is-visible {
-    opacity: 1;
-  }
-}
-
-@plugin "@tailwindcss/typography";
-
-/* Splide carousel pagination — TestimonialsCarousel */
-.testimonials-splide .splide__pagination {
-  position: static;
-  margin-top: 1.5rem;
-  gap: 0.5rem;
-  justify-content: flex-start;
-}
-.testimonials-splide .splide__pagination__page {
-  background: var(--color-blue, #0033CC);
-  opacity: 0.2;
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  transition: opacity 0.2s, width 0.2s;
-  margin: 0;
-}
-.testimonials-splide .splide__pagination__page.is-active {
-  background: var(--color-orange, #FE9D2B);
-  opacity: 1;
-  width: 24px;
-  transform: none;
-}
-@media (max-width: 1024px) {
-  .testimonials-splide .splide__pagination {
-    justify-content: center;
-  }
-}
+@import './styles/utilities.css';
+@import './styles/animations.css';

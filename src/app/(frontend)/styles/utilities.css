@@ -1,0 +1,16 @@
+/* Project-owned utilities.
+   Declared with @utility, so they work with variants (lg:section-y). */
+
+/* Site default container.
+   Overrides Tailwind's .container: the unconditional max-width here beats the
+   native utility's per-breakpoint steps, giving a fluid width that caps at
+   80rem (1280px). */
+@utility container {
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+/* Default vertical spacing for sections/blocks (mobile → desktop) */
+@utility section-y {
+  @apply py-16 lg:py-24;
+}

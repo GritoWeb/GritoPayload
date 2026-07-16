@@ -14,7 +14,7 @@ export default function NotFound() {
         className="absolute top-10 right-10 hidden md:block"
       />
 
-      <div className="max-w-7xl mx-auto flex flex-col items-center">
+      <div className="container flex flex-col items-center">
         <p className="font-eyebrow m-0 mb-4">Erro 404</p>
 
         <div className="relative inline-block mb-6">

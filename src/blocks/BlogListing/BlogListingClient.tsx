@@ -186,7 +186,7 @@ function FeaturedPostBanner({ post, locale }: { post: FeaturedPostItem; locale?:
     : null
 
   return (
-    <article className="max-w-7xl mx-auto mb-14">
+    <article className="container mb-14">
       <Link
         href={`${hrefPrefix}/posts/${post.slug}`}
         className="group grid grid-cols-1 md:grid-cols-[1.15fr_1fr] bg-white rounded-[28px] overflow-hidden border border-line no-underline text-inherit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
@@ -406,7 +406,7 @@ export function BlogListingClient({
 
   return (
     <section className="px-5 !pt-0 py-24">
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         {featuredPost && <FeaturedPostBanner post={featuredPost} locale={locale} />}
 
         <div className="flex items-baseline justify-between gap-6 flex-wrap mb-6">

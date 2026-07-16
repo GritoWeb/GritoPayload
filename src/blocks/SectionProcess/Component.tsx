@@ -21,7 +21,7 @@ export const SectionProcessComponent: React.FC<SectionProcessBlock> = ({
       className={`relative px-5 lg:px-12 section-y overflow-hidden${isWhite ? ' bg-white' : ''}`}
     >
       {!isWhite && <Sparkle size={42} color="#FE9D2B" className="absolute top-14 right-20" />}
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         <div className={`mb-6 ${isWhite ? 'max-w-2xl' : 'text-center max-w-2xl mx-auto'}`}>
           <SectionTitle
             eyebrow={eyebrow}

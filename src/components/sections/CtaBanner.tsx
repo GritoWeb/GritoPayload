@@ -33,7 +33,7 @@ export function CtaBanner({
 }) {
   const root = ['px-5 section-y', className].filter(Boolean).join(' ')
   const inner = [
-    'relative max-w-7xl mx-auto rounded-[32px] overflow-hidden',
+    'relative container rounded-[32px] overflow-hidden',
     'p-10 md:p-14',
     'grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-10 items-center',
     ctaBannerVariant[variant] ?? ctaBannerVariant.blue,

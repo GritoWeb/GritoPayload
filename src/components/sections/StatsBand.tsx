@@ -13,7 +13,7 @@ type StatsBandProps = {
 export function StatsBand({ stats, showDecoration = true }: StatsBandProps) {
   return (
     <section aria-label="Estatísticas" className="relative bg-blue px-5 section-y overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+      <div className="container">
         <div className="flex justify-center lg:justify-between gap-16 lg:gap-5 flex-wrap">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1 text-center md:text-left">
