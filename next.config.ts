@@ -16,6 +16,12 @@ const nextConfig = {
   // Read more: https://opennext.js.org/cloudflare/howtos/workerd
   serverExternalPackages: ['jose', 'pg-cloudflare'],
 
+  redirects: async () => [
+    // Old misspelled portfolio listing URL, fixed 2026-07
+    { source: '/portifolio', destination: '/portfolio', permanent: true },
+    { source: '/en/portifolio', destination: '/en/portfolio', permanent: true },
+  ],
+
   // Your Next.js config here
   webpack: (webpackConfig: any) => {
     webpackConfig.resolve.extensionAlias = {

@@ -56,3 +56,5 @@ node_modules/
 
 # SQL dumps (may contain sensitive data)
 *.sql
+# Production content dumps (backup-prod-content.mjs)
+backups/

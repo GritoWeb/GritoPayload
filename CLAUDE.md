@@ -5,6 +5,20 @@ Start with `.claude/skills/payload/SKILL.md` for a quick reference, then see `.c
 
 ---
 
+## ⚠️ Critical Rules
+
+Adapted from [GritoWeb/wordpress-standards-workflow](https://github.com/GritoWeb/wordpress-standards-workflow/blob/master/CLAUDE.md) — the rules that apply to this stack:
+
+- **Never `git push` without permission.**
+- **Never write to production / a remote environment without explicit permission.** Read-only commands against the remote (SELECTs via `wrangler d1 execute --remote`, dry-runs, `curl` on the live site) are free; writes (`pnpm deploy`, `CONFIRM=1 pnpm sync:prod`, remote D1 mutations, remote R2 uploads/deletes) need an explicit ask.
+- **Never add `Co-authored-by`** (or any AI attribution) in commit messages.
+- **Never modify third-party code** — nothing inside `node_modules/`; extend via config or wrappers instead.
+- **English** for all commit messages, comments, and variables (conversation stays in pt-BR).
+- **Never assume** — when unclear, stop and ask.
+- **Don't just agree** — push back on flawed requests with explanation.
+
+---
+
 # Guia de Setup — Nova Máquina
 
 Este documento é para o Claude ajudar um desenvolvedor a inicializar o projeto do zero após clonar o repositório.

@@ -2,8 +2,6 @@
  * Conteúdo final da página Portfólio (PT + EN).
  * Fonte: ../claude/gritoweb/site/portfolio.md e portfolio-en.md.
  *
- * O slug da página no CMS é "portifolio" (com "i"), não "portfolio". Não mexemos nisso
- * aqui — é mudança de URL, e Richard vai tratar os links depois.
  *
  * Saem do layout atual: homeSectionStats (o conteúdo diz explicitamente "Sem StatsBand
  * aqui") e homeSectionContact (não existe no conteúdo final).
@@ -100,7 +98,7 @@ const meta = {
 }
 
 export const portfolio: PageContent = {
-  slug: 'portifolio', // slug real no CMS, com o "i"
+  slug: 'portfolio',
   passthroughBlocks: [],
   build: (locale) => ({
     hero: hero[locale],
