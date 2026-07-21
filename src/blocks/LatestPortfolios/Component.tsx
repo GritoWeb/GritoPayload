@@ -31,7 +31,6 @@ export const LatestPortfoliosComponent: React.FC<LatestPortfoliosBlock> = async 
       tag: true,
       tagVariant: true,
       accent: true,
-      year: true,
       result: true,
     },
   })
@@ -46,7 +45,6 @@ export const LatestPortfoliosComponent: React.FC<LatestPortfoliosBlock> = async 
       slug: p.slug,
       client: p.client ?? null,
       result: p.result ?? null,
-      year: p.year ?? null,
       tagId: tag ? String(tag.id) : null,
       tagLabel: tag?.title ?? null,
       tagVariant: (p.tagVariant as 'blue' | 'orange') ?? 'blue',

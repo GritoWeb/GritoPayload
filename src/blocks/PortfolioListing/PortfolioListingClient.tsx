@@ -18,7 +18,6 @@ export type PortfolioItem = {
   slug: string
   client?: string | null
   result?: string | null
-  year?: string | null
   tagId?: string | null
   tagLabel?: string | null
   tagVariant?: 'blue' | 'orange'
@@ -39,27 +38,9 @@ export type PortfolioListingClientProps = {
   title?: string | null
   titleMaxWidth?: TitleMaxWidth | null
   showFilters: boolean
-  showViewToggle: boolean
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-
-const GridIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-)
-
-const ListIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-)
 
 const FilterIcon = () => (
   <svg
@@ -115,7 +96,7 @@ function Tag({ children, variant = 'blue' }: { children: React.ReactNode; varian
   )
 }
 
-// ── Card components ───────────────────────────────────────────────────────────
+// ── Card component ────────────────────────────────────────────────────────────
 
 export function PortfolioCardGrid({ item }: { item: PortfolioItem }) {
   const imageUrl = item.image?.url ?? null
@@ -163,50 +144,6 @@ export function PortfolioCardGrid({ item }: { item: PortfolioItem }) {
           />
         </span>
       </div>
-    </Link>
-  )
-}
-
-function PortfolioCardList({ item }: { item: PortfolioItem }) {
-  return (
-    <Link
-      href={`/portfolio/${item.slug}`}
-      className="group flex items-center gap-6 rounded-2xl bg-white border border-line p-5 no-underline text-inherit transition-shadow duration-150 motion-reduce:transition-none hover:shadow-[0_4px_16px_rgba(40,40,40,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
-    >
-      <div className={`shrink-0 w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden relative ${accentBg[item.accent ?? 'blue']}`}>
-        {item.image?.url ? (
-          <Image
-            src={item.image.url}
-            alt={item.image.alt ?? item.title}
-            fill
-            className="object-cover"
-            sizes="64px"
-          />
-        ) : (
-          <span className="font-display font-black text-xl opacity-20 select-none">
-            {item.title.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          {item.tagLabel && <Tag variant={item.tagVariant ?? 'blue'}>{item.tagLabel}</Tag>}
-          {item.year && <span className="font-body text-xs text-mute">{item.year}</span>}
-        </div>
-        {item.client && (
-          <p className="m-0 font-display font-bold text-[11px] uppercase tracking-[0.14em] text-orange mb-0.5">
-            {item.client}
-          </p>
-        )}
-        <h3 className="m-0 font-display font-bold text-base text-ink leading-snug">{item.title}</h3>
-        {item.result && (
-          <p className="m-0 mt-1 font-body text-sm font-medium text-blue">{item.result}</p>
-        )}
-      </div>
-      <ArrowIcon
-        size={24}
-        className="transition-transform duration-150 ease-out group-hover:translate-x-1 motion-reduce:transform-none"
-      />
     </Link>
   )
 }
@@ -259,7 +196,6 @@ export const PortfolioListingClient: React.FC<PortfolioListingClientProps> = ({
   title,
   titleMaxWidth,
   showFilters,
-  showViewToggle,
 }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -274,7 +210,6 @@ export const PortfolioListingClient: React.FC<PortfolioListingClientProps> = ({
   }, [])
 
   const [activeFilter, setActiveFilter] = useState<string>(initialFilter)
-  const [view, setView] = useState<'grid' | 'list'>('grid')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const handleFilterChange = (value: string) => {
@@ -316,120 +251,59 @@ export const PortfolioListingClient: React.FC<PortfolioListingClientProps> = ({
         </div>
 
         {/* Controls bar */}
-        {(showFilters || showViewToggle) && (
+        {showFilters && (
           <div className="mb-8">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              {/* Desktop: filter pills inline */}
-              {showFilters && (
-                <div className="hidden md:flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por categoria">
+            {/* Desktop: filter pills inline */}
+            <div className="hidden md:flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por categoria">
+              <FilterPills
+                filters={filters}
+                activeFilter={activeFilter}
+                onChange={handleFilterChange}
+              />
+            </div>
+
+            {/* Mobile: botão "Filtros" recolhível */}
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((open) => !open)}
+              aria-expanded={filtersOpen}
+              aria-controls="portfolio-mobile-filters"
+              className="md:hidden inline-flex items-center gap-2 px-4 py-2 rounded-full border-[1.5px] border-blue bg-transparent text-blue font-display font-medium text-sm cursor-pointer transition-colors duration-150 motion-reduce:transition-none hover:bg-blue/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            >
+              <FilterIcon />
+              Filtros
+              <ChevronIcon open={filtersOpen} />
+            </button>
+
+            {/* Mobile: painel expansível com os pills */}
+            <div
+              className={`md:hidden grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none ${filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+            >
+              <div className="overflow-hidden">
+                <div
+                  id="portfolio-mobile-filters"
+                  className="mt-4 flex flex-wrap gap-2.5 items-center"
+                  role="group"
+                  aria-label="Filtrar por categoria"
+                >
                   <FilterPills
                     filters={filters}
                     activeFilter={activeFilter}
                     onChange={handleFilterChange}
                   />
                 </div>
-              )}
-
-              {/* Mobile: botão "Filtros" recolhível */}
-              {showFilters && (
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen((open) => !open)}
-                  aria-expanded={filtersOpen}
-                  aria-controls="portfolio-mobile-filters"
-                  className="md:hidden inline-flex items-center gap-2 px-4 py-2 rounded-full border-[1.5px] border-blue bg-transparent text-blue font-display font-medium text-sm cursor-pointer transition-colors duration-150 motion-reduce:transition-none hover:bg-blue/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
-                >
-                  <FilterIcon />
-                  Filtros
-                  <ChevronIcon open={filtersOpen} />
-                </button>
-              )}
-
-              {/* View toggle (sempre visível) */}
-              {showViewToggle && (
-                <div className="relative flex items-center gap-1 rounded-full border border-line p-1" role="group" aria-label="Modo de visualização">
-                  <div
-                    aria-hidden="true"
-                    className={[
-                      'absolute top-1 bottom-1 rounded-full bg-blue',
-                      'transition-transform duration-200 ease-in-out motion-reduce:transition-none',
-                      view === 'list' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0',
-                    ].join(' ')}
-                    style={{ width: 'calc(50% - 6px)' }}
-                  />
-                  <button
-                    onClick={() => setView('grid')}
-                    aria-pressed={view === 'grid'}
-                    aria-label="Grade"
-                    className={[
-                      'relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-display font-medium text-sm cursor-pointer',
-                      'transition-colors duration-200 motion-reduce:transition-none',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-1',
-                      view === 'grid' ? 'text-white' : 'text-mute hover:text-ink',
-                    ].join(' ')}
-                  >
-                    <GridIcon /> Grade
-                  </button>
-                  <button
-                    onClick={() => setView('list')}
-                    aria-pressed={view === 'list'}
-                    aria-label="Lista"
-                    className={[
-                      'relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-display font-medium text-sm cursor-pointer',
-                      'transition-colors duration-200 motion-reduce:transition-none',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-1',
-                      view === 'list' ? 'text-white' : 'text-mute hover:text-ink',
-                    ].join(' ')}
-                  >
-                    <ListIcon /> Lista
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile: painel expansível com os pills */}
-            {showFilters && (
-              <div
-                className={`md:hidden grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none ${filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-              >
-                <div className="overflow-hidden">
-                  <div
-                    id="portfolio-mobile-filters"
-                    className="mt-4 flex flex-wrap gap-2.5 items-center"
-                    role="group"
-                    aria-label="Filtrar por categoria"
-                  >
-                    <FilterPills
-                      filters={filters}
-                      activeFilter={activeFilter}
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {view === 'grid' && (
-          <div key={`grid-${activeFilter}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((item, i) => (
-              <AnimatedCard key={item.id} delay={i * 60}>
-                <PortfolioCardGrid item={item} />
-              </AnimatedCard>
-            ))}
-          </div>
-        )}
-
-        {view === 'list' && (
-          <div key={`list-${activeFilter}`} className="flex flex-col gap-3">
-            {filtered.map((item, i) => (
-              <AnimatedCard key={item.id} delay={i * 50} className="">
-                <PortfolioCardList item={item} />
-              </AnimatedCard>
-            ))}
-          </div>
-        )}
+        <div key={`grid-${activeFilter}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((item, i) => (
+            <AnimatedCard key={item.id} delay={i * 60}>
+              <PortfolioCardGrid item={item} />
+            </AnimatedCard>
+          ))}
+        </div>
 
         {filtered.length === 0 && (
           <div className="text-center py-20 text-mute font-display animate-in fade-in duration-300 motion-reduce:animate-none">

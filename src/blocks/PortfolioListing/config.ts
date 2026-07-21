@@ -29,11 +29,5 @@ export const PortfolioListing: Block = {
       type: 'checkbox',
       defaultValue: true,
     },
-    {
-      name: 'showViewToggle',
-      label: 'Show Grid / List toggle',
-      type: 'checkbox',
-      defaultValue: true,
-    },
   ],
 }

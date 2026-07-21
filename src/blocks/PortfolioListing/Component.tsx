@@ -10,7 +10,6 @@ export const PortfolioListingComponent: React.FC<PortfolioListingBlock> = async 
   title,
   titleMaxWidth,
   showFilters,
-  showViewToggle,
 }) => {
   const payload = await getPayload({ config: configPromise })
 
@@ -29,7 +28,6 @@ export const PortfolioListingComponent: React.FC<PortfolioListingBlock> = async 
         tag: true,
         tagVariant: true,
         accent: true,
-        year: true,
         result: true,
       },
     }),
@@ -51,7 +49,6 @@ export const PortfolioListingComponent: React.FC<PortfolioListingBlock> = async 
       slug: p.slug,
       client: p.client ?? null,
       result: p.result ?? null,
-      year: p.year ?? null,
       tagId: tag ? String(tag.id) : null,
       tagLabel: tag?.title ?? null,
       tagVariant: (p.tagVariant as 'blue' | 'orange') ?? 'blue',
@@ -60,11 +57,16 @@ export const PortfolioListingComponent: React.FC<PortfolioListingBlock> = async 
     }
   })
 
-  const filters: FilterOption[] = tagsResult.docs.map((tag) => ({
-    label: tag.title,
-    value: String(tag.id),
-    slug: tag.slug,
-  }))
+  // Only surface tags that have at least one portfolio assigned to them
+  const usedTagIds = new Set(portfolios.map((p) => p.tagId).filter(Boolean))
+
+  const filters: FilterOption[] = tagsResult.docs
+    .filter((tag) => usedTagIds.has(String(tag.id)))
+    .map((tag) => ({
+      label: tag.title,
+      value: String(tag.id),
+      slug: tag.slug,
+    }))
 
   return (
     <PortfolioListingClient
@@ -74,7 +76,6 @@ export const PortfolioListingComponent: React.FC<PortfolioListingBlock> = async 
       title={title}
       titleMaxWidth={titleMaxWidth as TitleMaxWidth | null | undefined}
       showFilters={showFilters ?? true}
-      showViewToggle={showViewToggle ?? true}
     />
   )
 }
