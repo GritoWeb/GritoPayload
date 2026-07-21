@@ -1,5 +1,12 @@
 import type { CollectionConfig } from 'payload'
 import { slugField } from 'payload'
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -21,108 +28,104 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
     tag: true,
     tagVariant: true,
     accent: true,
-    year: true,
     result: true,
     summary: true,
   },
   admin: {
     group: 'Portfolio',
-    defaultColumns: ['title', 'client', 'year', 'updatedAt'],
+    defaultColumns: ['title', 'client', 'updatedAt'],
     useAsTitle: 'title',
   },
   fields: [
-    {
-      name: 'title',
-      label: 'Project title',
-      type: 'text',
-      localized: true,
-      required: true,
-    },
-    {
-      name: 'client',
-      label: 'Company / client name',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'summary',
-      label: 'Summary (hero subtitle)',
-      type: 'textarea',
-      localized: true,
-      admin: { description: 'Appears below the title on the case page.' },
-    },
-    {
-      name: 'image',
-      label: 'Cover image (hero)',
-      type: 'upload',
-      relationTo: 'media',
-      required: true,
-    },
-    {
-      name: 'tag',
-      label: 'Card tag',
-      type: 'relationship',
-      relationTo: 'portfolio-tags',
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'tagVariant',
-      label: 'Tag color',
-      type: 'select',
-      options: [
-        { label: 'Blue', value: 'blue' },
-        { label: 'Orange', value: 'orange' },
-      ],
-      defaultValue: 'blue',
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'accent',
-      label: 'Card color',
-      type: 'select',
-      options: [
-        { label: 'Blue', value: 'blue' },
-        { label: 'Orange', value: 'orange' },
-      ],
-      defaultValue: 'blue',
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'year',
-      label: 'Year',
-      type: 'text',
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'result',
-      label: 'Featured result (card)',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-        description: 'Shown on the listing card. Ex: +38% average ticket',
-      },
-    },
-    {
-      name: 'siteUrl',
-      label: 'Live site link',
-      type: 'text',
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'nextProjectHref',
-      label: 'Next project link',
-      type: 'text',
-      admin: { position: 'sidebar', description: '"Next project" button in the hero.' },
-    },
-    {
-      name: 'publishedAt',
-      type: 'date',
-      admin: { position: 'sidebar' },
-    },
-
+    // ── Hero ──────────────────────────────────────────────────────────────
     {
       type: 'collapsible',
-      label: 'Meta strip (client / sector / deliverables / duration)',
+      label: 'Hero',
+      admin: { initCollapsed: false },
+      fields: [
+        {
+          name: 'title',
+          label: 'Project title',
+          type: 'text',
+          localized: true,
+          required: true,
+        },
+        {
+          name: 'client',
+          label: 'Company / client name',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'summary',
+          label: 'Summary (hero subtitle)',
+          type: 'textarea',
+          localized: true,
+          admin: { description: 'Appears below the title on the case page.' },
+        },
+        {
+          name: 'image',
+          label: 'Cover image (hero)',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+      ],
+    },
+
+    // ── Listing card ──────────────────────────────────────────────────────
+    {
+      type: 'collapsible',
+      label: 'Listing card',
+      admin: {
+        initCollapsed: false,
+        description: 'How this project appears in the /portfolio grid.',
+      },
+      fields: [
+        {
+          name: 'tag',
+          label: 'Card tag',
+          type: 'relationship',
+          relationTo: 'portfolio-tags',
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'tagVariant',
+              label: 'Tag color',
+              type: 'select',
+              options: [
+                { label: 'Blue', value: 'blue' },
+                { label: 'Orange', value: 'orange' },
+              ],
+              defaultValue: 'blue',
+            },
+            {
+              name: 'accent',
+              label: 'Card color',
+              type: 'select',
+              options: [
+                { label: 'Blue', value: 'blue' },
+                { label: 'Orange', value: 'orange' },
+              ],
+              defaultValue: 'blue',
+            },
+          ],
+        },
+        {
+          name: 'result',
+          label: 'Featured result (card)',
+          type: 'text',
+          admin: { description: 'Shown on the listing card. Ex: +38% average ticket' },
+        },
+      ],
+    },
+
+    // ── Meta strip ────────────────────────────────────────────────────────
+    {
+      type: 'collapsible',
+      label: 'Meta strip',
       admin: { initCollapsed: true },
       fields: [
         {
@@ -145,26 +148,53 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
+    // ── Intro ─────────────────────────────────────────────────────────────
     {
       type: 'collapsible',
-      label: 'The challenge',
+      label: 'Intro',
       admin: { initCollapsed: true },
       fields: [
         {
-          name: 'challengeTitle',
-          label: 'Challenge title',
+          name: 'introLayout',
+          label: 'Layout',
+          type: 'select',
+          defaultValue: 'two',
+          options: [
+            { label: 'Two columns (eyebrow + title left, body right)', value: 'two' },
+            { label: 'Single column', value: 'one' },
+          ],
+        },
+        {
+          name: 'introEyebrow',
+          label: 'Eyebrow',
+          type: 'text',
+          localized: true,
+          admin: { description: 'Small label above the title. Leave empty to hide.' },
+        },
+        {
+          name: 'introTitle',
+          label: 'Title',
           type: 'text',
           admin: { description: 'Use *word* for orange.' },
         },
         {
-          name: 'challengeBody',
-          label: 'Challenge body',
-          type: 'textarea',
-          admin: { description: 'Paragraphs separated by a blank line.' },
+          name: 'introBody',
+          label: 'Body',
+          type: 'richText',
+          editor: lexicalEditor({
+            features: ({ rootFeatures }) => [
+              ...rootFeatures,
+              HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+              FixedToolbarFeature(),
+              InlineToolbarFeature(),
+              HorizontalRuleFeature(),
+            ],
+          }),
         },
       ],
     },
 
+    // ── Process ───────────────────────────────────────────────────────────
     {
       name: 'processSteps',
       label: 'Process',
@@ -190,6 +220,7 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
+    // ── Gallery ───────────────────────────────────────────────────────────
     {
       name: 'gallery',
       label: 'Gallery',
@@ -221,6 +252,7 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
+    // ── Client quote ──────────────────────────────────────────────────────
     {
       type: 'collapsible',
       label: 'Client quote',
@@ -244,6 +276,7 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
+    // ── Results / stats ───────────────────────────────────────────────────
     {
       name: 'stats',
       label: 'Results (numbers)',
@@ -265,24 +298,7 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
-    {
-      name: 'team',
-      label: 'Team',
-      type: 'array',
-      admin: { initCollapsed: true },
-      fields: [
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'text',
-        },
-        {
-          name: 'role',
-          label: 'Role',
-          type: 'text',
-        },
-      ],
-    },
+    // ── Stack ─────────────────────────────────────────────────────────────
     {
       name: 'stack',
       label: 'Stack / tooling',
@@ -297,17 +313,30 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
+    // ── Related projects ──────────────────────────────────────────────────
     {
-      name: 'relatedPortfolios',
+      type: 'collapsible',
       label: 'Related projects',
-      type: 'relationship',
-      relationTo: 'portfolios',
-      hasMany: true,
-      maxRows: 3,
-      filterOptions: ({ id }) => ({ id: { not_in: [id] } }),
-      admin: { position: 'sidebar' },
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'relatedPortfolios',
+          label: 'Related projects',
+          type: 'relationship',
+          relationTo: 'portfolios',
+          hasMany: true,
+          maxRows: 3,
+          filterOptions: ({ id }) => ({ id: { not_in: [id] } }),
+        },
+      ],
     },
 
+    // ── Publishing (sidebar) ──────────────────────────────────────────────
+    {
+      name: 'publishedAt',
+      type: 'date',
+      admin: { position: 'sidebar' },
+    },
     slugField(),
   ],
   hooks: {

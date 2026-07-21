@@ -7,18 +7,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import type { Metadata } from 'next'
+import { RichText } from '@payloadcms/richtext-lexical/react'
 
 import type { Portfolio, Media, PortfolioTag } from '@/payload-types'
 import { generateMeta } from '@/utilities/generateMeta'
 import { parseTitle } from '@/utilities/parseTitle'
 import { ArrowIcon } from '@/components/ui/ArrowIcon'
-import { Button } from '@/components/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { MetaStrip } from '@/components/ui/MetaStrip'
 import { Gallery, type GalleryItem } from '@/components/ui/Gallery'
 import { BigQuote } from '@/components/ui/BigQuote'
 import { ResultsGrid } from '@/components/ui/ResultsGrid'
-import { Avatar } from '@/components/ui/Avatar'
 import { FaleComAGente } from '@/components/sections/FaleComAGente'
 import { PortfolioCardGrid, type PortfolioItem } from '@/blocks/PortfolioListing/PortfolioListingClient'
 import { Sparkle, ChatMark } from '@/home/illustrations'
@@ -51,7 +50,6 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
     p.sector ? { label: 'Setor', value: p.sector } : null,
     p.deliverables ? { label: 'Entregas', value: p.deliverables } : null,
     p.duration ? { label: 'Duração', value: p.duration } : null,
-    p.year && !p.sector && !p.deliverables && !p.duration ? { label: 'Ano', value: p.year } : null,
   ].filter(Boolean) as { label: string; value: string }[]
 
   const galleryItems: GalleryItem[] = (p.gallery ?? [])
@@ -80,7 +78,6 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
         slug: r.slug,
         client: r.client ?? null,
         result: r.result ?? null,
-        year: r.year ?? null,
         tagId: rtag ? String(rtag.id) : null,
         tagLabel: rtag?.title ?? null,
         tagVariant: (r.tagVariant as 'blue' | 'orange') ?? 'blue',
@@ -114,11 +111,6 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
                   {tag.title}
                 </span>
               )}
-              {p.year && (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full font-body text-xs font-bold uppercase tracking-[0.04em] bg-paper-dim text-mute">
-                  {p.year}
-                </span>
-              )}
             </div>
             <h1 className="m-0 text-blue max-w-3xl">
               <span className="font-light">{p.client} </span>
@@ -128,16 +120,6 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
             {p.summary && (
               <p className="mt-4 text-ink-soft max-w-xl leading-relaxed">{p.summary}</p>
             )}
-            <div className="flex flex-wrap gap-2.5 mt-7">
-              {p.siteUrl && (
-                <Button href={p.siteUrl} variant="primary">
-                  Ver o site ao vivo <ArrowIcon size={24} />
-                </Button>
-              )}
-              <Button href={p.nextProjectHref ?? '/portfolio'} variant="ghost">
-                Próximo projeto
-              </Button>
-            </div>
           </div>
 
           <div className="relative bg-blue rounded-3xl p-8 min-h-[300px] md:min-h-[420px] flex items-center justify-center overflow-hidden">
@@ -169,21 +151,27 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
         </div>
       )}
 
-      {/* ── Desafio ─────────────────────────────────────────────────── */}
-      {(p.challengeTitle || p.challengeBody) && (
+      {/* ── Intro ───────────────────────────────────────────────────── */}
+      {(p.introEyebrow || p.introTitle || p.introBody) && (
         <section className="px-5 py-16">
-          <div className="container grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
+          <div
+            className={
+              p.introLayout === 'one'
+                ? 'container max-w-3xl'
+                : 'container grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start'
+            }
+          >
             <div>
-              <p className="font-eyebrow m-0 mb-3">O desafio</p>
-              {p.challengeTitle && (
-                <h2 className="m-0 text-blue">{parseTitle(p.challengeTitle)}</h2>
+              {p.introEyebrow && <p className="font-eyebrow m-0 mb-3">{p.introEyebrow}</p>}
+              {p.introTitle && (
+                <h2 className="m-0 text-blue">{parseTitle(p.introTitle)}</h2>
               )}
             </div>
-            {p.challengeBody && (
-              <div className="text-ink-soft leading-relaxed space-y-4">
-                {p.challengeBody.split('\n\n').map((paragraph) => (
-                  <p key={paragraph} className="m-0">{paragraph}</p>
-                ))}
+            {p.introBody && (
+              <div
+                className={`prose max-w-none prose-p:text-ink-soft prose-p:leading-relaxed prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink ${p.introLayout === 'one' ? 'mt-6' : ''}`}
+              >
+                <RichText data={p.introBody} />
               </div>
             )}
           </div>
@@ -261,42 +249,21 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
         </section>
       )}
 
-      {/* ── Equipe & Stack ───────────────────────────────────────────── */}
-      {((p.team && p.team.length > 0) || (p.stack && p.stack.length > 0)) && (
+      {/* ── Stack ────────────────────────────────────────────────────── */}
+      {p.stack && p.stack.length > 0 && (
         <section className="px-5 py-13">
-          <div className="container grid grid-cols-1 md:grid-cols-2 gap-12">
-            {p.team && p.team.length > 0 && (
-              <div>
-                <p className="font-eyebrow m-0 mb-3">Equipe</p>
-                <h3 className="m-0 mb-5 text-2xl font-bold">Quem fez</h3>
-                <ul className="list-none p-0 m-0 flex flex-col gap-3.5">
-                  {p.team.map((member) => (
-                    <li key={member.id ?? member.name} className="flex items-center gap-3.5">
-                      <Avatar name={member.name ?? ''} variant="blue" size="md" />
-                      <div>
-                        <div className="font-display font-medium">{member.name}</div>
-                        <div className="text-[13px] text-mute">{member.role}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {p.stack && p.stack.length > 0 && (
-              <div className="md:col-span-2">
-                <h3 className="m-0 mb-5 text-2xl font-bold">Stack</h3>
-                <div className="flex flex-wrap gap-2">
-                  {p.stack.map((item) => (
-                    <span
-                      key={item.id ?? item.tool}
-                      className="inline-flex items-center px-3 py-1.5 rounded-full font-body text-xs font-bold uppercase tracking-[0.04em] bg-paper-dim text-ink-soft border border-line"
-                    >
-                      {item.tool}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="container">
+            <h3 className="m-0 mb-5 text-2xl font-bold">Stack</h3>
+            <div className="flex flex-wrap gap-2">
+              {p.stack.map((item) => (
+                <span
+                  key={item.id ?? item.tool}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full font-body text-xs font-bold uppercase tracking-[0.04em] bg-paper-dim text-ink-soft border border-line"
+                >
+                  {item.tool}
+                </span>
+              ))}
+            </div>
           </div>
         </section>
       )}

@@ -590,7 +590,6 @@ export interface PortfolioListingBlock {
    */
   titleMaxWidth: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   showFilters?: boolean | null;
-  showViewToggle?: boolean | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'portfolioListing';
@@ -746,17 +745,10 @@ export interface Portfolio {
   tag?: (number | null) | PortfolioTag;
   tagVariant?: ('blue' | 'orange') | null;
   accent?: ('blue' | 'orange') | null;
-  year?: string | null;
   /**
    * Shown on the listing card. Ex: +38% average ticket
    */
   result?: string | null;
-  siteUrl?: string | null;
-  /**
-   * "Next project" button in the hero.
-   */
-  nextProjectHref?: string | null;
-  publishedAt?: string | null;
   sector?: string | null;
   /**
    * Ex: Site, POS, Reservations
@@ -766,14 +758,30 @@ export interface Portfolio {
    * Ex: 10 weeks
    */
   duration?: string | null;
+  introLayout?: ('two' | 'one') | null;
+  /**
+   * Small label above the title. Leave empty to hide.
+   */
+  introEyebrow?: string | null;
   /**
    * Use *word* for orange.
    */
-  challengeTitle?: string | null;
-  /**
-   * Paragraphs separated by a blank line.
-   */
-  challengeBody?: string | null;
+  introTitle?: string | null;
+  introBody?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   processSteps?:
     | {
         /**
@@ -809,13 +817,6 @@ export interface Portfolio {
         id?: string | null;
       }[]
     | null;
-  team?:
-    | {
-        name?: string | null;
-        role?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   stack?:
     | {
         tool?: string | null;
@@ -823,6 +824,7 @@ export interface Portfolio {
       }[]
     | null;
   relatedPortfolios?: (number | Portfolio)[] | null;
+  publishedAt?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1407,7 +1409,6 @@ export interface PortfolioListingBlockSelect<T extends boolean = true> {
   title?: T;
   titleMaxWidth?: T;
   showFilters?: T;
-  showViewToggle?: T;
   id?: T;
   blockName?: T;
 }
@@ -1464,16 +1465,14 @@ export interface PortfoliosSelect<T extends boolean = true> {
   tag?: T;
   tagVariant?: T;
   accent?: T;
-  year?: T;
   result?: T;
-  siteUrl?: T;
-  nextProjectHref?: T;
-  publishedAt?: T;
   sector?: T;
   deliverables?: T;
   duration?: T;
-  challengeTitle?: T;
-  challengeBody?: T;
+  introLayout?: T;
+  introEyebrow?: T;
+  introTitle?: T;
+  introBody?: T;
   processSteps?:
     | T
     | {
@@ -1500,13 +1499,6 @@ export interface PortfoliosSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
-  team?:
-    | T
-    | {
-        name?: T;
-        role?: T;
-        id?: T;
-      };
   stack?:
     | T
     | {
@@ -1514,6 +1506,7 @@ export interface PortfoliosSelect<T extends boolean = true> {
         id?: T;
       };
   relatedPortfolios?: T;
+  publishedAt?: T;
   generateSlug?: T;
   slug?: T;
   meta?:

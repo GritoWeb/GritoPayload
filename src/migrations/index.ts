@@ -27,6 +27,10 @@ import * as migration_20260615_141615_add_posts_fts from './20260615_141615_add_
 import * as migration_20260622_add_post_banner from './20260622_add_post_banner';
 import * as migration_20260711_160459_localize_latest_blocks from './20260711_160459_localize_latest_blocks';
 import * as migration_20260711_225019_pullquote_body from './20260711_225019_pullquote_body';
+import * as migration_20260719_021048_remove_portfolio_view_toggle from './20260719_021048_remove_portfolio_view_toggle';
+import * as migration_20260719_022847_remove_portfolio_year from './20260719_022847_remove_portfolio_year';
+import * as migration_20260719_124051_remove_portfolio_links_and_team from './20260719_124051_remove_portfolio_links_and_team';
+import * as migration_20260719_140000_intro_block_richtext from './20260719_140000_intro_block_richtext';
 
 export const migrations = [
   {
@@ -172,6 +176,26 @@ export const migrations = [
   {
     up: migration_20260711_225019_pullquote_body.up,
     down: migration_20260711_225019_pullquote_body.down,
-    name: '20260711_225019_pullquote_body'
+    name: '20260711_225019_pullquote_body',
+  },
+  {
+    up: migration_20260719_021048_remove_portfolio_view_toggle.up,
+    down: migration_20260719_021048_remove_portfolio_view_toggle.down,
+    name: '20260719_021048_remove_portfolio_view_toggle',
+  },
+  {
+    up: migration_20260719_022847_remove_portfolio_year.up,
+    down: migration_20260719_022847_remove_portfolio_year.down,
+    name: '20260719_022847_remove_portfolio_year',
+  },
+  {
+    up: migration_20260719_124051_remove_portfolio_links_and_team.up,
+    down: migration_20260719_124051_remove_portfolio_links_and_team.down,
+    name: '20260719_124051_remove_portfolio_links_and_team'
+  },
+  {
+    up: migration_20260719_140000_intro_block_richtext.up,
+    down: migration_20260719_140000_intro_block_richtext.down,
+    name: '20260719_140000_intro_block_richtext'
   },
 ];
