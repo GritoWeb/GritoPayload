@@ -26,6 +26,13 @@ function resolveHref(link: NavItem['link'], locale: string): string {
 const linkBase =
   'no-underline font-body font-bold text-xs uppercase tracking-[0.12em] transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper rounded-sm'
 
+// Orange underline drawn with an ::after pseudo-element. It scales in from the
+// left on hover; active items keep it shown by default (see `underlineActive`).
+const underlineBase =
+  "relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:bg-orange after:rounded-full after:origin-left after:transition-transform after:duration-300 after:ease-out motion-reduce:after:transition-none"
+const underlineHover = 'after:scale-x-0 hover:after:scale-x-100'
+const underlineActive = 'after:scale-x-100'
+
 export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -80,7 +87,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
                   <Link
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`${linkBase} ${isActive ? 'text-orange' : 'text-blue hover:text-orange'}`}
+                    className={`${linkBase} ${underlineBase} ${
+                      isActive ? `text-orange ${underlineActive}` : `text-blue hover:text-orange ${underlineHover}`
+                    }`}
                   >
                     {item.label}
                   </Link>
@@ -91,7 +100,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
               <button
                 onClick={switchLocale}
                 aria-label={`Switch to ${otherLocale === 'en' ? 'English' : 'Português'}`}
-                className={`${linkBase} text-blue hover:text-orange bg-transparent border-0 cursor-pointer p-0`}
+                className={`${linkBase} ${underlineBase} ${underlineHover} text-blue hover:text-orange bg-transparent border-0 cursor-pointer p-0`}
               >
                 {otherLocale.toUpperCase()}
               </button>
