@@ -758,6 +758,10 @@ export interface Portfolio {
    * Ex: 10 weeks
    */
   duration?: string | null;
+  /**
+   * Ex: 2021 — shown as "Desde" in the facts rail.
+   */
+  since?: string | null;
   introLayout?: ('two' | 'one') | null;
   /**
    * Small label above the title. Leave empty to hide.
@@ -801,6 +805,13 @@ export interface Portfolio {
         id?: string | null;
       }[]
     | null;
+  /**
+   * The strong lead sentence, rendered large. Leave empty to skip.
+   */
+  quoteHighlight?: string | null;
+  /**
+   * The testimonial body, always at reading size.
+   */
   quoteText?: string | null;
   quoteAuthor?: string | null;
   quoteRole?: string | null;
@@ -1469,6 +1480,7 @@ export interface PortfoliosSelect<T extends boolean = true> {
   sector?: T;
   deliverables?: T;
   duration?: T;
+  since?: T;
   introLayout?: T;
   introEyebrow?: T;
   introTitle?: T;
@@ -1489,6 +1501,7 @@ export interface PortfoliosSelect<T extends boolean = true> {
         accent?: T;
         id?: T;
       };
+  quoteHighlight?: T;
   quoteText?: T;
   quoteAuthor?: T;
   quoteRole?: T;

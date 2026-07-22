@@ -31,6 +31,7 @@ import * as migration_20260719_021048_remove_portfolio_view_toggle from './20260
 import * as migration_20260719_022847_remove_portfolio_year from './20260719_022847_remove_portfolio_year';
 import * as migration_20260719_124051_remove_portfolio_links_and_team from './20260719_124051_remove_portfolio_links_and_team';
 import * as migration_20260719_140000_intro_block_richtext from './20260719_140000_intro_block_richtext';
+import * as migration_20260721_000000_add_since_and_quote_highlight from './20260721_000000_add_since_and_quote_highlight';
 
 export const migrations = [
   {
@@ -197,5 +198,10 @@ export const migrations = [
     up: migration_20260719_140000_intro_block_richtext.up,
     down: migration_20260719_140000_intro_block_richtext.down,
     name: '20260719_140000_intro_block_richtext'
+  },
+  {
+    up: migration_20260721_000000_add_since_and_quote_highlight.up,
+    down: migration_20260721_000000_add_since_and_quote_highlight.down,
+    name: '20260721_000000_add_since_and_quote_highlight'
   },
 ];

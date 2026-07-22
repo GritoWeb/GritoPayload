@@ -145,6 +145,12 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
           type: 'text',
           admin: { description: 'Ex: 10 weeks' },
         },
+        {
+          name: 'since',
+          label: 'Since / year',
+          type: 'text',
+          admin: { description: 'Ex: 2021 — shown as "Desde" in the facts rail.' },
+        },
       ],
     },
 
@@ -259,9 +265,16 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       admin: { initCollapsed: true },
       fields: [
         {
+          name: 'quoteHighlight',
+          label: 'Highlight sentence',
+          type: 'textarea',
+          admin: { description: 'The strong lead sentence, rendered large. Leave empty to skip.' },
+        },
+        {
           name: 'quoteText',
           label: 'Quote',
           type: 'textarea',
+          admin: { description: 'The testimonial body, always at reading size.' },
         },
         {
           name: 'quoteAuthor',

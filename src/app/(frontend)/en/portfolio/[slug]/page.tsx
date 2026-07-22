@@ -14,17 +14,22 @@ import { generateMeta } from '@/utilities/generateMeta'
 import { parseTitle } from '@/utilities/parseTitle'
 import { ArrowIcon } from '@/components/ui/ArrowIcon'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { MetaStrip } from '@/components/ui/MetaStrip'
+import { MetaStrip, type MetaItem } from '@/components/ui/MetaStrip'
 import { Gallery, type GalleryItem } from '@/components/ui/Gallery'
 import { BigQuote } from '@/components/ui/BigQuote'
 import { ResultsGrid } from '@/components/ui/ResultsGrid'
+import { PortfolioTimeline } from '@/components/ui/PortfolioTimeline'
 import { FaleComAGente } from '@/components/sections/FaleComAGente'
-import { PortfolioCardGrid, type PortfolioItem } from '@/blocks/PortfolioListing/PortfolioListingClient'
-import { Sparkle, ChatMark } from '@/home/illustrations'
+import { type PortfolioItem } from '@/blocks/PortfolioListing/PortfolioListingClient'
+import { ChatMark } from '@/home/illustrations'
 
 export const dynamic = 'force-dynamic'
 
 const locale = 'en' as const
+
+// Reading column — same width as the blog (max-w-[1024px]) so text fills it
+// instead of leaving whitespace beside a narrow measure.
+const shell = 'mx-auto max-w-[1024px]'
 
 type Args = { params: Promise<{ slug: string }> }
 
@@ -36,7 +41,6 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 export default async function PortfolioPage({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
   const { slug } = await paramsPromise
   const portfolio = await queryPortfolioBySlug({ slug: decodeURIComponent(slug) })
   if (!portfolio) notFound()
@@ -45,12 +49,19 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
   const tag = p.tag && typeof p.tag === 'object' ? (p.tag as PortfolioTag) : null
   const coverImage = p.image && typeof p.image === 'object' ? (p.image as Media) : null
 
-  const metaItems = [
+  const stackValue = (p.stack ?? [])
+    .map((item) => item.tool)
+    .filter(Boolean)
+    .join(' · ')
+
+  const facts = [
     { label: 'Client', value: p.client },
-    p.sector ? { label: 'Sector', value: p.sector } : null,
-    p.deliverables ? { label: 'Deliverables', value: p.deliverables } : null,
+    p.sector ? { label: 'Sector', value: p.sector, small: true } : null,
+    p.deliverables ? { label: 'Deliverables', value: p.deliverables, small: true } : null,
     p.duration ? { label: 'Duration', value: p.duration } : null,
-  ].filter(Boolean) as { label: string; value: string }[]
+    p.since ? { label: 'Since', value: p.since } : null,
+    stackValue ? { label: 'Stack', value: stackValue, small: true } : null,
+  ].filter(Boolean) as MetaItem[]
 
   const galleryItems: GalleryItem[] = (p.gallery ?? [])
     .map((item) => {
@@ -85,6 +96,7 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
         image: img,
       }
     })
+  const next = relatedPortfolios[0] ?? null
 
   const breadcrumbItems = [
     { label: 'Portfolio', href: '/en/portfolio' },
@@ -96,197 +108,194 @@ export default async function PortfolioPage({ params: paramsPromise }: Args) {
     <>
       {/* ── Breadcrumb ──────────────────────────────────────────────── */}
       <div className="px-5 pt-6">
-        <div className="container">
+        <div className={shell}>
           <Breadcrumb items={breadcrumbItems} />
         </div>
       </div>
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
-      <section className="px-5 py-10 md:py-14">
-        <div className="container grid grid-cols-1 md:grid-cols-[1.25fr_1fr] gap-12 md:gap-16 items-center">
-          <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {tag && (
-                <span className={`inline-flex items-center px-3 py-1.5 rounded-full font-body text-xs font-bold uppercase tracking-[0.04em] ${p.tagVariant === 'orange' ? 'bg-orange/15 text-orange-700' : 'bg-blue/10 text-blue'}`}>
-                  {tag.title}
-                </span>
-              )}
-            </div>
-            <h1 className="m-0 text-blue max-w-3xl">
-              <span className="font-light">{p.client} </span>
-              <br />
-              {parseTitle(p.title)}
-            </h1>
-            {p.summary && (
-              <p className="mt-4 text-ink-soft max-w-xl leading-relaxed">{p.summary}</p>
-            )}
-          </div>
+      <section className="px-5 pb-10 pt-6">
+        <div className={shell}>
+          {tag && (
+            <span className="mb-[18px] inline-block rounded-full bg-blue/[0.08] px-3 py-1.5 text-[0.72rem] font-extrabold uppercase tracking-[0.06em] text-blue">
+              {tag.title}
+            </span>
+          )}
+          <h1 className="m-0 text-blue">
+            <span className="mb-0.5 block text-[0.5em] font-light leading-tight text-blue/55">{p.client}</span>
+            {parseTitle(p.title)}
+          </h1>
+          {p.summary && (
+            <p className="mt-4 max-w-[48ch] text-[1.15rem] leading-relaxed text-ink-soft">{p.summary}</p>
+          )}
 
-          <div className="relative bg-blue rounded-3xl p-8 min-h-[300px] md:min-h-[420px] flex items-center justify-center overflow-hidden">
+          <div className="relative mt-8 flex h-[clamp(200px,34vw,330px)] items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-blue to-blue-600">
             {coverImage?.url ? (
               <Image
                 src={coverImage.url}
                 alt={coverImage.alt ?? p.title}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 100vw, 1024px"
                 priority
               />
             ) : (
-              <span className="font-display font-black text-[8rem] text-white/10 select-none">
-                {p.client.charAt(0)}
-              </span>
+              <>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:repeating-linear-gradient(135deg,#fff_0_2px,transparent_2px_16px)]"
+                />
+                <span className="relative font-display text-2xl font-black tracking-wide text-white/90">
+                  {p.client}
+                </span>
+              </>
             )}
-            <Sparkle size={60} color="#FE9D2B" className="absolute -top-5 -right-5 opacity-80" />
           </div>
         </div>
       </section>
 
-      {/* ── Meta strip ──────────────────────────────────────────────── */}
-      {metaItems.length > 0 && (
-        <div className="px-5 pb-8">
-          <div className="container">
-            <MetaStrip items={metaItems.slice(0, 4)} />
+      {/* ── Facts rail ──────────────────────────────────────────────── */}
+      {facts.length > 0 && (
+        <section className="px-5 pb-12">
+          <div className={shell}>
+            <MetaStrip items={facts} />
           </div>
-        </div>
+        </section>
       )}
 
       {/* ── Intro ───────────────────────────────────────────────────── */}
       {(p.introEyebrow || p.introTitle || p.introBody) && (
-        <section className="px-5 py-16">
-          <div
-            className={
-              p.introLayout === 'one'
-                ? 'container max-w-3xl'
-                : 'container grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start'
-            }
-          >
-            <div>
-              {p.introEyebrow && <p className="font-eyebrow m-0 mb-3">{p.introEyebrow}</p>}
-              {p.introTitle && (
-                <h2 className="m-0 text-blue">{parseTitle(p.introTitle)}</h2>
-              )}
-            </div>
-            {p.introBody && (
-              <div
-                className={`prose max-w-none prose-p:text-ink-soft prose-p:leading-relaxed prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink ${p.introLayout === 'one' ? 'mt-6' : ''}`}
-              >
-                <RichText data={p.introBody} />
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            {p.introLayout === 'two' ? (
+              <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-14">
+                <div>
+                  <div className="mb-5 h-[3px] w-11 rounded-sm bg-orange" />
+                  {p.introEyebrow && <p className="font-eyebrow m-0 mb-2">{p.introEyebrow}</p>}
+                  {p.introTitle && <h2 className="m-0 text-blue">{parseTitle(p.introTitle)}</h2>}
+                </div>
+                {p.introBody && (
+                  <div className="prose max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
+                    <RichText data={p.introBody} />
+                  </div>
+                )}
               </div>
+            ) : (
+              <>
+                <div className="mb-5 h-[3px] w-11 rounded-sm bg-orange" />
+                {p.introEyebrow && <p className="font-eyebrow m-0 mb-2">{p.introEyebrow}</p>}
+                {p.introTitle && <h2 className="m-0 max-w-[20ch] text-blue">{parseTitle(p.introTitle)}</h2>}
+                {p.introBody && (
+                  <div className="prose mt-6 max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
+                    <RichText data={p.introBody} />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>
       )}
 
-      {/* ── Process ─────────────────────────────────────────────────── */}
+      {/* ── Process (timeline) ──────────────────────────────────────── */}
       {p.processSteps && p.processSteps.length > 0 && (
-        <section className="bg-white border-y border-line px-5 py-16">
-          <div className="container">
-            <div className="mb-10">
-              <p className="font-eyebrow text-orange m-0 mb-3">Process</p>
-              <h2 className="m-0 text-blue">How we did it</h2>
-            </div>
-            <ol className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 list-none p-0 m-0">
-              {p.processSteps.map((step) => (
-                <li key={step.id ?? step.number}>
-                  {step.number && (
-                    <p className="m-0 font-display font-black text-[56px] leading-none text-orange">
-                      {step.number}
-                    </p>
-                  )}
-                  {step.title && (
-                    <h3 className="mt-1 m-0 font-bold text-blue text-xl">{step.title}</h3>
-                  )}
-                  {step.description && (
-                    <p className="mt-2 m-0 text-[15px] text-mute leading-relaxed">{step.description}</p>
-                  )}
-                </li>
-              ))}
-            </ol>
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            <p className="font-eyebrow m-0">Process</p>
+            <h2 className="m-0 mt-2 text-blue">How we did it</h2>
+            <PortfolioTimeline
+              steps={p.processSteps.map((step) => ({
+                number: step.number,
+                title: step.title,
+                description: step.description,
+                id: step.id,
+              }))}
+            />
           </div>
         </section>
       )}
 
       {/* ── Gallery ──────────────────────────────────────────────────── */}
       {galleryItems.length > 0 && (
-        <section className="px-5 py-16">
-          <div className="container">
-            <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <p className="font-eyebrow m-0 mb-3">Gallery</p>
-                <h2 className="m-0">What we delivered</h2>
+                <p className="font-eyebrow m-0 mb-2">Gallery</p>
+                <h2 className="m-0 text-blue">What we delivered</h2>
               </div>
-              <span className="font-body text-[13px] text-mute">
-                {galleryItems.length} project images
-              </span>
+              <span className="font-body text-[13px] text-mute">{galleryItems.length} project images</span>
             </div>
             <Gallery items={galleryItems} />
           </div>
         </section>
       )}
 
-      {/* ── Big Quote ────────────────────────────────────────────────── */}
-      {p.quoteText && (
-        <div className="px-5 py-8">
-          <BigQuote
-            quote={p.quoteText}
-            author={p.quoteAuthor}
-            role={p.quoteRole}
-          />
-        </div>
+      {/* ── Client quote ─────────────────────────────────────────────── */}
+      {(p.quoteHighlight || p.quoteText) && (
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            <BigQuote
+              highlight={p.quoteHighlight}
+              body={p.quoteText}
+              author={p.quoteAuthor}
+              role={p.quoteRole}
+            />
+          </div>
+        </section>
       )}
 
       {/* ── Results ──────────────────────────────────────────────────── */}
       {p.stats && p.stats.length > 0 && (
-        <section className="px-5 py-16">
-          <div className="container">
-            <div className="mb-8">
-              <p className="font-eyebrow m-0 mb-3">Results</p>
-              <h2 className="m-0 text-blue">What <span className="text-orange">happened</span> after</h2>
-            </div>
-            <ResultsGrid stats={p.stats as { value: string; label: string }[]} />
-          </div>
-        </section>
-      )}
-
-      {/* ── Stack ────────────────────────────────────────────────────── */}
-      {p.stack && p.stack.length > 0 && (
-        <section className="px-5 pb-16">
-          <div className="container">
-            <p className="font-eyebrow m-0 mb-3">Tools</p>
-            <h3 className="m-0 mb-5 text-2xl font-bold">Stack</h3>
-            <div className="flex flex-wrap gap-2">
-              {p.stack.map((item) => (
-                <span
-                  key={item.id ?? item.tool}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full font-body text-xs font-bold uppercase tracking-[0.04em] bg-paper-dim text-ink-soft border border-line"
-                >
-                  {item.tool}
-                </span>
-              ))}
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            <p className="font-eyebrow m-0">Results</p>
+            <h2 className="m-0 mb-2 mt-2 text-blue">
+              What <span className="text-orange">happened</span> after
+            </h2>
+            <div className="mt-6">
+              <ResultsGrid stats={p.stats as { value: string; label: string }[]} />
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Related projects ─────────────────────────────────────────── */}
-      {relatedPortfolios.length > 0 && (
-        <section className="bg-white border-t border-line px-5 py-16">
-          <div className="container">
-            <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
-              <div>
-                <p className="font-eyebrow m-0 mb-3">Keep exploring</p>
-                <h2 className="m-0">Related projects</h2>
-              </div>
-              <Link href="/en/portfolio" className="font-display font-medium text-sm text-blue no-underline hover:opacity-75 transition-opacity">
-                View full portfolio <ArrowIcon size={24} />
+      {/* ── Next case ────────────────────────────────────────────────── */}
+      {next && (
+        <section className="px-5">
+          <div className={`${shell} border-t border-line py-12`}>
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <p className="font-eyebrow m-0">Keep exploring</p>
+              <Link
+                href="/en/portfolio"
+                className="inline-flex flex-none items-center gap-1.5 whitespace-nowrap font-display text-sm font-medium text-blue no-underline transition-opacity hover:opacity-75"
+              >
+                View full portfolio <ArrowIcon size={20} />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedPortfolios.map((item) => (
-                <PortfolioCardGrid key={item.id} item={item} />
-              ))}
-            </div>
+            <Link
+              href={`/en/portfolio/${next.slug}`}
+              className="flex items-center gap-5 rounded-[20px] border border-line bg-white p-5 no-underline transition-shadow hover:shadow-[0_8px_24px_rgba(40,40,40,0.07)]"
+            >
+              <span className="relative flex h-[72px] w-24 flex-none items-center justify-center overflow-hidden rounded-xl bg-orange p-1.5 text-center text-[0.7rem] font-black text-white">
+                {next.image?.url ? (
+                  <Image src={next.image.url} alt={next.image.alt ?? next.title} fill className="object-cover" sizes="96px" />
+                ) : (
+                  next.title
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.68rem] font-extrabold uppercase tracking-[0.1em] text-orange">
+                  Next case
+                </span>
+                <h3 className="m-0 mt-0.5 text-blue">{next.title}</h3>
+                {(next.result || next.client) && (
+                  <p className="m-0 mt-0.5 text-[0.9rem] text-mute">{next.result ?? next.client}</p>
+                )}
+              </span>
+              <span aria-hidden="true" className="flex-none text-2xl font-black text-blue">
+                →
+              </span>
+            </Link>
           </div>
         </section>
       )}
