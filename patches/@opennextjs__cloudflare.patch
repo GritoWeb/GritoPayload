@@ -1,0 +1,70 @@
+diff --git a/dist/cli/templates/images.js b/dist/cli/templates/images.js
+index 5646a9aa835587a9dbd6ac7916f6c898b6b7152d..340256fc53daf551a2fba4af9255e337c8caff9e 100644
+--- a/dist/cli/templates/images.js
++++ b/dist/cli/templates/images.js
+@@ -1,4 +1,4 @@
+-import { error, warn } from "@opennextjs/aws/adapters/logger.js";
++import { warn } from "@opennextjs/aws/adapters/logger.js";
+ /**
+  * Handles requests to /_next/image(/), including image optimizations.
+  *
+@@ -19,39 +19,30 @@ export async function handleImageRequest(requestURL, requestHeaders, env) {
+         });
+     }
+     let imageResponse;
+-    if (parseResult.url.startsWith("/")) {
+-        if (env.ASSETS === undefined) {
+-            error("env.ASSETS binding is not defined");
+-            return new Response('"url" parameter is valid but upstream response is invalid', {
+-                status: 404,
+-            });
+-        }
+-        const absoluteURL = new URL(parseResult.url, requestURL);
+-        imageResponse = await env.ASSETS.fetch(absoluteURL);
++    const fetchTarget = parseResult.url.startsWith("/")
++        ? new URL(parseResult.url, requestURL).href
++        : parseResult.url;
++    let fetchImageResult;
++    try {
++        fetchImageResult = await fetchWithRedirects(fetchTarget, 7_000, __IMAGES_MAX_REDIRECTS__);
+     }
+-    else {
+-        let fetchImageResult;
+-        try {
+-            fetchImageResult = await fetchWithRedirects(parseResult.url, 7_000, __IMAGES_MAX_REDIRECTS__);
+-        }
+-        catch (e) {
+-            throw new Error("Failed to fetch image", { cause: e });
++    catch (e) {
++        throw new Error("Failed to fetch image", { cause: e });
++    }
++    if (!fetchImageResult.ok) {
++        if (fetchImageResult.error === "timed_out") {
++            return new Response('"url" parameter is valid but upstream response timed out', {
++                status: 504,
++            });
+         }
+-        if (!fetchImageResult.ok) {
+-            if (fetchImageResult.error === "timed_out") {
+-                return new Response('"url" parameter is valid but upstream response timed out', {
+-                    status: 504,
+-                });
+-            }
+-            if (fetchImageResult.error === "too_many_redirects") {
+-                return new Response('"url" parameter is valid but upstream response is invalid', {
+-                    status: 508,
+-                });
+-            }
+-            throw new Error("Failed to fetch image");
++        if (fetchImageResult.error === "too_many_redirects") {
++            return new Response('"url" parameter is valid but upstream response is invalid', {
++                status: 508,
++            });
+         }
+-        imageResponse = fetchImageResult.response;
++        throw new Error("Failed to fetch image");
+     }
++    imageResponse = fetchImageResult.response;
+     if (!imageResponse.ok || imageResponse.body === null) {
+         return new Response('"url" parameter is valid but upstream response is invalid', {
+             status: imageResponse.status,
