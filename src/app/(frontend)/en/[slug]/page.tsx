@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { PageView, pageMetadata } from '@/components/pages/PageView'
 
-export const dynamic = 'force-dynamic'
-
 type Args = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {

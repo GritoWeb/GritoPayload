@@ -10,6 +10,7 @@ import {
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+import { revalidatePortfolio, revalidatePortfolioDelete } from './hooks/revalidatePortfolio'
 
 export const Portfolios: CollectionConfig<'portfolios'> = {
   slug: 'portfolios',
@@ -354,6 +355,8 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
   ],
   hooks: {
     beforeChange: [populatePublishedAt],
+    afterChange: [revalidatePortfolio],
+    afterDelete: [revalidatePortfolioDelete],
   },
   versions: {
     drafts: {

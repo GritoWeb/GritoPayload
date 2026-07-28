@@ -1,30 +1,54 @@
 import { cache } from 'react'
 import { draftMode } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
 import type { Portfolio, Media, PortfolioTag } from '@/payload-types'
 import type { GalleryItem } from '@/components/ui/Gallery'
 import type { PortfolioItem } from '@/blocks/PortfolioListing/PortfolioListingClient'
+import { CACHE_TAGS, CACHE_TTL } from '@/lib/cacheTags'
 import type { PortfolioLocale } from './strings'
 
-// Cached raw doc — shared by the page AND its metadata so we hit D1 only once.
+const fetchPortfolioBySlug = async ({
+  slug,
+  locale,
+  draft,
+}: {
+  slug: string
+  locale: PortfolioLocale
+  draft: boolean
+}) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'portfolios',
+    draft,
+    limit: 1,
+    overrideAccess: draft,
+    locale,
+    where: { slug: { equals: slug } },
+    depth: 2,
+  })
+
+  return (result.docs?.[0] as Portfolio | undefined) ?? null
+}
+
+// Published case persisted in the data cache (R2), tagged for the Portfolios
+// publish hook. Draft/live-preview bypasses the cache.
+const cachedPortfolioBySlug = (slug: string, locale: PortfolioLocale) =>
+  unstable_cache(
+    () => fetchPortfolioBySlug({ slug, locale, draft: false }),
+    ['portfolio', slug, locale],
+    { tags: [CACHE_TAGS.portfolios], revalidate: CACHE_TTL },
+  )()
+
+// Cached raw doc — shared by the page AND its metadata (resolved once per request).
 export const queryPortfolioBySlug = cache(
   async ({ slug, locale }: { slug: string; locale: PortfolioLocale }) => {
     const { isEnabled: draft } = await draftMode()
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection: 'portfolios',
-      draft,
-      limit: 1,
-      overrideAccess: draft,
-      locale,
-      where: { slug: { equals: slug } },
-      depth: 2,
-    })
-
-    return (result.docs?.[0] as Portfolio | undefined) ?? null
+    if (draft) return fetchPortfolioBySlug({ slug, locale, draft: true })
+    return cachedPortfolioBySlug(slug, locale)
   },
 )
 

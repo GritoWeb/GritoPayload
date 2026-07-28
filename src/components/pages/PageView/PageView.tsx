@@ -1,6 +1,7 @@
 import React, { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { draftMode } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
@@ -11,6 +12,7 @@ import { RenderHero } from '@/heros/RenderHero'
 import { buildAsyncBlocks } from '@/blocks/buildAsyncBlocks'
 import { generateMeta } from '@/utilities/generateMeta'
 import { PageContent } from '@/components/PageContent'
+import { CACHE_TAGS, CACHE_TTL } from '@/lib/cacheTags'
 import type { Page } from '@/payload-types'
 
 // Shared body for both the home page (slug "home") and every generic CMS page
@@ -20,22 +22,45 @@ import type { Page } from '@/payload-types'
 
 export type PageLocale = 'pt' | 'en'
 
-// Cached raw doc — shared by the page AND its metadata so we hit D1 only once.
+const fetchPageBySlug = async ({
+  slug,
+  locale,
+  draft,
+}: {
+  slug: string
+  locale: PageLocale
+  draft: boolean
+}) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'pages',
+    draft,
+    limit: 1,
+    pagination: false,
+    overrideAccess: draft,
+    locale,
+    where: { slug: { equals: slug } },
+  })
+
+  return result.docs?.[0] ?? null
+}
+
+// Published pages are persisted in the data cache (R2), keyed by slug+locale and
+// tagged so the Pages publish hook invalidates them. Draft/live-preview is never
+// cached — it must always reflect the latest autosave.
+const cachedPageBySlug = (slug: string, locale: PageLocale) =>
+  unstable_cache(() => fetchPageBySlug({ slug, locale, draft: false }), ['page', slug, locale], {
+    tags: [CACHE_TAGS.pages],
+    revalidate: CACHE_TTL,
+  })()
+
+// Cached raw doc — shared by the page AND its metadata so we resolve it once per
+// request (React cache), reading from the data cache instead of D1 when published.
 const queryPageBySlug = cache(
   async ({ slug, locale, draft }: { slug: string; locale: PageLocale; draft: boolean }) => {
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection: 'pages',
-      draft,
-      limit: 1,
-      pagination: false,
-      overrideAccess: draft,
-      locale,
-      where: { slug: { equals: slug } },
-    })
-
-    return result.docs?.[0] ?? null
+    if (draft) return fetchPageBySlug({ slug, locale, draft: true })
+    return cachedPageBySlug(slug, locale)
   },
 )
 

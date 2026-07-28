@@ -1,29 +1,52 @@
 import { cache } from 'react'
 import { draftMode } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
 import type { Post, Media, Tag, User } from '@/payload-types'
 import type { PostItem } from '@/blocks/BlogListing/BlogListingClient'
+import { CACHE_TAGS, CACHE_TTL } from '@/lib/cacheTags'
 import type { PostLocale } from './strings'
 
-// Cached raw doc — shared by the page AND its metadata so we hit D1 only once.
+const fetchPostBySlug = async ({
+  slug,
+  locale,
+  draft,
+}: {
+  slug: string
+  locale: PostLocale
+  draft: boolean
+}) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    draft,
+    limit: 1,
+    overrideAccess: draft,
+    locale,
+    where: { slug: { equals: slug } },
+    depth: 2,
+  })
+
+  return (result.docs?.[0] as Post | undefined) ?? null
+}
+
+// Published post persisted in the data cache (R2), tagged for the Posts publish
+// hook. Draft/live-preview bypasses the cache.
+const cachedPostBySlug = (slug: string, locale: PostLocale) =>
+  unstable_cache(() => fetchPostBySlug({ slug, locale, draft: false }), ['post', slug, locale], {
+    tags: [CACHE_TAGS.posts],
+    revalidate: CACHE_TTL,
+  })()
+
+// Cached raw doc — shared by the page AND its metadata (resolved once per request).
 export const queryPostBySlug = cache(
   async ({ slug, locale }: { slug: string; locale: PostLocale }) => {
     const { isEnabled: draft } = await draftMode()
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection: 'posts',
-      draft,
-      limit: 1,
-      overrideAccess: draft,
-      locale,
-      where: { slug: { equals: slug } },
-      depth: 2,
-    })
-
-    return (result.docs?.[0] as Post | undefined) ?? null
+    if (draft) return fetchPostBySlug({ slug, locale, draft: true })
+    return cachedPostBySlug(slug, locale)
   },
 )
 

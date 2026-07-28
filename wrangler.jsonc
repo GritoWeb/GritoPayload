@@ -22,7 +22,16 @@
 			"database_id": "2441aab2-5f9e-4240-ab99-e1d5bcde15e8",
 			"remote": true,
 		},
- 
+		// OpenNext tag cache — tracks on-demand revalidation (revalidatePath /
+		// revalidateTag from the admin publish hooks). Dedicated DB, kept apart
+		// from the Payload D1 so sync:prod / verify-sync never touch it.
+		// The `revalidations` table is auto-created at deploy by populateCache.
+		// database_id is filled in by `wrangler d1 create grito-web-next-tag-cache`.
+		{
+			"binding": "NEXT_TAG_CACHE_D1",
+			"database_name": "grito-web-next-tag-cache",
+			"database_id": "REPLACE_WITH_D1_CREATE_OUTPUT",
+		},
 	],
 	"services": [
 		// The service should match the "name" of your worker
@@ -40,11 +49,13 @@
 			"remote": true,
 		},
  
-		// Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
-		// {
-		//   "binding": "NEXT_INC_CACHE_R2_BUCKET",
-		//   "bucket_name": "<BUCKET_NAME>",
-		// },
+		// OpenNext incremental cache — stores rendered ISR pages. Dedicated bucket,
+		// kept apart from the Payload media R2 so sync:prod / sync:local never see it.
+		// Create it with `wrangler r2 bucket create grito-web-next-cache`.
+		{
+			"binding": "NEXT_INC_CACHE_R2_BUCKET",
+			"bucket_name": "grito-web-next-cache",
+		},
 	],
 	// Here's how to configure an additional environment
 	// It can be deployed with `CLOUDFLARE_ENV=staging pnpm run deploy`
