@@ -18,7 +18,7 @@ import { PortfolioTimeline } from '@/components/ui/PortfolioTimeline'
 import { FaleComAGente } from '@/components/sections/FaleComAGente'
 import { ChatMark } from '@/home/illustrations'
 
-import { getPortfolioCase, queryPortfolioBySlug } from './getPortfolioCase'
+import { getPortfolioCase, queryPortfolioBySlug, toGalleryItems } from './getPortfolioCase'
 import { strings, basePath, type PortfolioLocale } from './strings'
 
 // Reading column — same width as the blog (max-w-[1024px]) so text fills it
@@ -50,7 +50,7 @@ export async function PortfolioCasePage({
   const data = await getPortfolioCase(decodeURIComponent(slug), locale)
   if (!data) notFound()
 
-  const { doc: p, tag, coverImage, stack, gallery, next } = data
+  const { doc: p, tag, coverImage, stack, next } = data
 
   // The only logic left here is presentational: pairing i18n labels with values.
   const facts = [
@@ -127,101 +127,124 @@ export async function PortfolioCasePage({
         </section>
       )}
 
-      {/* ── Intro ───────────────────────────────────────────────────── */}
-      {(p.introEyebrow || p.introTitle || p.introBody) && (
-        <section className="px-5">
-          <div className={`${shell} border-t border-line py-12`}>
-            {p.introLayout === 'two' ? (
-              <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-14">
-                <div>
-                  <div className="mb-5 h-[3px] w-11 rounded-sm bg-orange" />
-                  {p.introEyebrow && <p className="font-eyebrow m-0 mb-2">{p.introEyebrow}</p>}
-                  {p.introTitle && <h2 className="m-0 text-blue">{parseTitle(p.introTitle)}</h2>}
-                </div>
-                {p.introBody && (
-                  <div className="prose max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
-                    <RichText data={p.introBody} />
+      {/* ── Case body (blocks) ──────────────────────────────────────── */}
+      {(p.content ?? []).map((block) => {
+        const key = block.id ?? `${block.blockType}`
+
+        if (block.blockType === 'caseText') {
+          if (!block.eyebrow && !block.title && !block.body) return null
+          const rule = <div className="mb-5 h-[3px] w-11 rounded-sm bg-orange" />
+          const eyebrow = block.eyebrow ? <p className="font-eyebrow m-0 mb-2">{block.eyebrow}</p> : null
+          return (
+            <section className="px-5" key={key}>
+              <div className={`${shell} border-t border-line py-12`}>
+                {block.layout === 'one' ? (
+                  <>
+                    {rule}
+                    {eyebrow}
+                    {block.title && (
+                      <h2 className="m-0 max-w-[20ch] text-blue">{parseTitle(block.title)}</h2>
+                    )}
+                    {block.body && (
+                      <div className="prose mt-6 max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
+                        <RichText data={block.body} />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-14">
+                    <div>
+                      {rule}
+                      {eyebrow}
+                      {block.title && <h2 className="m-0 text-blue">{parseTitle(block.title)}</h2>}
+                    </div>
+                    {block.body && (
+                      <div className="prose max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
+                        <RichText data={block.body} />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ) : (
-              <>
-                <div className="mb-5 h-[3px] w-11 rounded-sm bg-orange" />
-                {p.introEyebrow && <p className="font-eyebrow m-0 mb-2">{p.introEyebrow}</p>}
-                {p.introTitle && <h2 className="m-0 max-w-[20ch] text-blue">{parseTitle(p.introTitle)}</h2>}
-                {p.introBody && (
-                  <div className="prose mt-6 max-w-none prose-p:leading-relaxed prose-p:text-ink-soft prose-headings:font-display prose-headings:text-blue prose-a:text-blue prose-strong:text-ink">
-                    <RichText data={p.introBody} />
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-      )}
+            </section>
+          )
+        }
 
-      {/* ── Process (timeline) ──────────────────────────────────────── */}
-      {p.processSteps && p.processSteps.length > 0 && (
-        <section className="px-5">
-          <div className={`${shell} border-t border-line py-12`}>
-            <p className="font-eyebrow m-0">{t.process}</p>
-            <h2 className="m-0 mt-2 text-blue">{t.processTitle}</h2>
-            <PortfolioTimeline
-              steps={p.processSteps.map((step) => ({
-                number: step.number,
-                title: step.title,
-                description: step.description,
-                id: step.id,
-              }))}
-            />
-          </div>
-        </section>
-      )}
+        if (block.blockType === 'caseTimeline') {
+          const steps = block.steps ?? []
+          if (steps.length === 0) return null
+          return (
+            <section className="px-5" key={key}>
+              <div className={`${shell} border-t border-line py-12`}>
+                <p className="font-eyebrow m-0">{t.process}</p>
+                <h2 className="m-0 mt-2 text-blue">{t.processTitle}</h2>
+                <PortfolioTimeline
+                  steps={steps.map((step) => ({
+                    number: step.number,
+                    title: step.title,
+                    description: step.description,
+                    id: step.id,
+                  }))}
+                />
+              </div>
+            </section>
+          )
+        }
 
-      {/* ── Gallery ──────────────────────────────────────────────────── */}
-      {gallery.length > 0 && (
-        <section className="px-5">
-          <div className={`${shell} border-t border-line py-12`}>
-            <div className="mb-8">
-              <p className="font-eyebrow m-0 mb-2">{t.gallery}</p>
-              <h2 className="m-0 text-blue">{t.galleryTitle}</h2>
-            </div>
-            <Gallery items={gallery} />
-          </div>
-        </section>
-      )}
+        if (block.blockType === 'caseGallery') {
+          const items = toGalleryItems(block.items, p.title)
+          if (items.length === 0) return null
+          return (
+            <section className="px-5" key={key}>
+              <div className={`${shell} border-t border-line py-12`}>
+                <div className="mb-8">
+                  <p className="font-eyebrow m-0 mb-2">{t.gallery}</p>
+                  <h2 className="m-0 text-blue">{t.galleryTitle}</h2>
+                </div>
+                <Gallery items={items} />
+              </div>
+            </section>
+          )
+        }
 
-      {/* ── Client quote ─────────────────────────────────────────────── */}
-      {(p.quoteHighlight || p.quoteText) && (
-        <section className="px-5">
-          <div className={`${shell} border-t border-line py-12`}>
-            <BigQuote
-              highlight={p.quoteHighlight}
-              body={p.quoteText}
-              author={p.quoteAuthor}
-              role={p.quoteRole}
-            />
-          </div>
-        </section>
-      )}
+        if (block.blockType === 'caseQuote') {
+          if (!block.highlight && !block.text) return null
+          return (
+            <section className="px-5" key={key}>
+              <div className={`${shell} border-t border-line py-12`}>
+                <BigQuote
+                  highlight={block.highlight}
+                  body={block.text}
+                  author={block.author}
+                  role={block.role}
+                />
+              </div>
+            </section>
+          )
+        }
 
-      {/* ── Results ──────────────────────────────────────────────────── */}
-      {p.stats && p.stats.length > 0 && (
-        <section className="px-5">
-          <div className={`${shell} border-t border-line py-12`}>
-            <p className="font-eyebrow m-0">{t.results}</p>
-            <h2 className="m-0 mb-2 mt-2 text-blue">
-              {t.resultsA}
-              <span className="text-orange">{t.resultsHighlight}</span>
-              {t.resultsB}
-            </h2>
-            <div className="mt-6">
-              <ResultsGrid stats={p.stats as { value: string; label: string }[]} />
-            </div>
-          </div>
-        </section>
-      )}
+        if (block.blockType === 'caseStats') {
+          const stats = block.stats ?? []
+          if (stats.length === 0) return null
+          return (
+            <section className="px-5" key={key}>
+              <div className={`${shell} border-t border-line py-12`}>
+                <p className="font-eyebrow m-0">{t.results}</p>
+                <h2 className="m-0 mb-2 mt-2 text-blue">
+                  {t.resultsA}
+                  <span className="text-orange">{t.resultsHighlight}</span>
+                  {t.resultsB}
+                </h2>
+                <div className="mt-6">
+                  <ResultsGrid stats={stats as { value: string; label: string }[]} />
+                </div>
+              </div>
+            </section>
+          )
+        }
 
+        return null
+      })}
       {/* ── Next case ────────────────────────────────────────────────── */}
       {next && (
         <section className="px-5">

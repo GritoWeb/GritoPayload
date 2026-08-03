@@ -155,163 +155,125 @@ export const Portfolios: CollectionConfig<'portfolios'> = {
       ],
     },
 
-    // ── Intro ─────────────────────────────────────────────────────────────
+    // ── Case content ──────────────────────────────────────────────────────
+    // Repeatable layout for the case body. Mirrors the block structure the
+    // production database already stores under the `content` path.
     {
-      type: 'collapsible',
-      label: 'Intro',
-      admin: { initCollapsed: true },
-      fields: [
+      name: 'content',
+      label: 'Case content',
+      type: 'blocks',
+      admin: {
+        description: 'Build the case body by stacking blocks in the order they should read.',
+      },
+      blocks: [
         {
-          name: 'introLayout',
-          label: 'Layout',
-          type: 'select',
-          defaultValue: 'two',
-          options: [
-            { label: 'Two columns (eyebrow + title left, body right)', value: 'two' },
-            { label: 'Single column', value: 'one' },
+          slug: 'caseText',
+          labels: { singular: 'Text', plural: 'Text blocks' },
+          fields: [
+            {
+              name: 'layout',
+              label: 'Layout',
+              type: 'select',
+              defaultValue: 'two',
+              options: [
+                { label: 'Two columns (eyebrow + title left, body right)', value: 'two' },
+                { label: 'Single column', value: 'one' },
+              ],
+            },
+            { name: 'eyebrow', label: 'Eyebrow', type: 'text', localized: true },
+            {
+              name: 'title',
+              label: 'Title',
+              type: 'text',
+              localized: true,
+              admin: { description: 'Wrap a word in *asterisks* to accent it.' },
+            },
+            { name: 'body', label: 'Body', type: 'richText', localized: true },
           ],
         },
         {
-          name: 'introEyebrow',
-          label: 'Eyebrow',
-          type: 'text',
-          localized: true,
-          admin: { description: 'Small label above the title. Leave empty to hide.' },
-        },
-        {
-          name: 'introTitle',
-          label: 'Title',
-          type: 'text',
-          admin: { description: 'Use *word* for orange.' },
-        },
-        {
-          name: 'introBody',
-          label: 'Body',
-          type: 'richText',
-          editor: lexicalEditor({
-            features: ({ rootFeatures }) => [
-              ...rootFeatures,
-              HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-              FixedToolbarFeature(),
-              InlineToolbarFeature(),
-              HorizontalRuleFeature(),
-            ],
-          }),
-        },
-      ],
-    },
-
-    // ── Process ───────────────────────────────────────────────────────────
-    {
-      name: 'processSteps',
-      label: 'Process',
-      type: 'array',
-      admin: { initCollapsed: true },
-      fields: [
-        {
-          name: 'number',
-          label: 'Number',
-          type: 'text',
-          admin: { description: 'Ex: 01' },
-        },
-        {
-          name: 'title',
-          label: 'Title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-        },
-      ],
-    },
-
-    // ── Gallery ───────────────────────────────────────────────────────────
-    {
-      name: 'gallery',
-      label: 'Gallery',
-      type: 'array',
-      admin: { initCollapsed: true },
-      fields: [
-        {
-          name: 'image',
-          label: 'Image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-        },
-        {
-          name: 'label',
-          label: 'Caption',
-          type: 'text',
-        },
-        {
-          name: 'accent',
-          label: 'Background color (fallback)',
-          type: 'select',
-          options: [
-            { label: 'Blue', value: 'blue' },
-            { label: 'Orange', value: 'orange' },
+          slug: 'caseTimeline',
+          labels: { singular: 'Timeline', plural: 'Timelines' },
+          fields: [
+            {
+              name: 'steps',
+              label: 'Steps',
+              type: 'array',
+              admin: { initCollapsed: true },
+              fields: [
+                { name: 'number', label: 'Number', type: 'text', admin: { description: 'Ex: 01' } },
+                { name: 'title', label: 'Title', type: 'text', localized: true },
+                { name: 'description', label: 'Description', type: 'textarea', localized: true },
+              ],
+            },
           ],
-          defaultValue: 'blue',
+        },
+        {
+          slug: 'caseGallery',
+          labels: { singular: 'Gallery', plural: 'Galleries' },
+          fields: [
+            {
+              name: 'items',
+              label: 'Images',
+              type: 'array',
+              admin: { initCollapsed: true },
+              fields: [
+                { name: 'image', label: 'Image', type: 'upload', relationTo: 'media' },
+                { name: 'label', label: 'Caption', type: 'text', localized: true },
+                {
+                  name: 'accent',
+                  label: 'Accent',
+                  type: 'select',
+                  defaultValue: 'blue',
+                  options: [
+                    { label: 'Blue', value: 'blue' },
+                    { label: 'Orange', value: 'orange' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'caseQuote',
+          labels: { singular: 'Client quote', plural: 'Client quotes' },
+          fields: [
+            {
+              name: 'highlight',
+              label: 'Highlight sentence',
+              type: 'textarea',
+              localized: true,
+              admin: { description: 'The strong lead sentence, rendered large. Leave empty to skip.' },
+            },
+            {
+              name: 'text',
+              label: 'Quote',
+              type: 'textarea',
+              localized: true,
+              admin: { description: 'The testimonial body, always at reading size.' },
+            },
+            { name: 'author', label: 'Author', type: 'text' },
+            { name: 'role', label: 'Role / company', type: 'text' },
+          ],
+        },
+        {
+          slug: 'caseStats',
+          labels: { singular: 'Results (numbers)', plural: 'Results (numbers)' },
+          fields: [
+            {
+              name: 'stats',
+              label: 'Numbers',
+              type: 'array',
+              admin: { initCollapsed: true },
+              fields: [
+                { name: 'value', label: 'Value', type: 'text', admin: { description: 'Ex: 90+' } },
+                { name: 'label', label: 'Label', type: 'text', localized: true },
+              ],
+            },
+          ],
         },
       ],
     },
-
-    // ── Client quote ──────────────────────────────────────────────────────
-    {
-      type: 'collapsible',
-      label: 'Client quote',
-      admin: { initCollapsed: true },
-      fields: [
-        {
-          name: 'quoteHighlight',
-          label: 'Highlight sentence',
-          type: 'textarea',
-          admin: { description: 'The strong lead sentence, rendered large. Leave empty to skip.' },
-        },
-        {
-          name: 'quoteText',
-          label: 'Quote',
-          type: 'textarea',
-          admin: { description: 'The testimonial body, always at reading size.' },
-        },
-        {
-          name: 'quoteAuthor',
-          label: 'Author',
-          type: 'text',
-        },
-        {
-          name: 'quoteRole',
-          label: 'Role / company',
-          type: 'text',
-        },
-      ],
-    },
-
-    // ── Results / stats ───────────────────────────────────────────────────
-    {
-      name: 'stats',
-      label: 'Results (numbers)',
-      type: 'array',
-      admin: { initCollapsed: true },
-      fields: [
-        {
-          name: 'value',
-          label: 'Value',
-          type: 'text',
-          admin: { description: 'Ex: +38%' },
-        },
-        {
-          name: 'label',
-          label: 'Description',
-          type: 'text',
-          admin: { description: 'Ex: Average ticket after redesign' },
-        },
-      ],
-    },
-
     // ── Stack ─────────────────────────────────────────────────────────────
     {
       name: 'stack',

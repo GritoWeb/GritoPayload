@@ -60,9 +60,38 @@ export type PortfolioCaseView = {
   tag: PortfolioTag | null
   coverImage: Media | null
   stack: string
-  gallery: GalleryItem[]
   next: PortfolioItem | null
 }
+
+type GalleryBlockItem = {
+  image?: number | Media | null
+  label?: string | null
+  accent?: ('blue' | 'orange') | null
+  id?: string | null
+}
+
+/**
+ * Maps a `caseGallery` block's rows onto the shape the Gallery component wants,
+ * dropping any row whose upload was removed.
+ */
+export const toGalleryItems = (
+  items: GalleryBlockItem[] | null | undefined,
+  fallbackAlt: string,
+): GalleryItem[] =>
+  (items ?? [])
+    .map((item) => {
+      const img = item.image && typeof item.image === 'object' ? (item.image as Media) : null
+      if (!img?.url) return null
+      return {
+        url: img.url,
+        alt: img.alt ?? item.label ?? fallbackAlt,
+        width: img.width ?? undefined,
+        height: img.height ?? undefined,
+        accent: (item.accent as 'blue' | 'orange') ?? 'blue',
+        label: item.label ?? undefined,
+      }
+    })
+    .filter(Boolean) as GalleryItem[]
 
 export async function getPortfolioCase(
   slug: string,
@@ -78,21 +107,6 @@ export async function getPortfolioCase(
     .map((item) => item.tool)
     .filter(Boolean)
     .join(' · ')
-
-  const gallery: GalleryItem[] = (doc.gallery ?? [])
-    .map((item) => {
-      const img = item.image && typeof item.image === 'object' ? (item.image as Media) : null
-      if (!img?.url) return null
-      return {
-        url: img.url,
-        alt: img.alt ?? item.label ?? doc.title,
-        width: img.width ?? undefined,
-        height: img.height ?? undefined,
-        accent: (item.accent as 'blue' | 'orange') ?? 'blue',
-        label: item.label ?? undefined,
-      }
-    })
-    .filter(Boolean) as GalleryItem[]
 
   const relatedPortfolios: PortfolioItem[] = ((doc.relatedPortfolios as Portfolio[]) ?? [])
     .filter((r) => typeof r === 'object')
@@ -115,5 +129,5 @@ export async function getPortfolioCase(
 
   const next = relatedPortfolios[0] ?? null
 
-  return { doc, tag, coverImage, stack, gallery, next }
+  return { doc, tag, coverImage, stack, next }
 }

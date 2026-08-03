@@ -762,71 +762,97 @@ export interface Portfolio {
    * Ex: 2021 — shown as "Desde" in the facts rail.
    */
   since?: string | null;
-  introLayout?: ('two' | 'one') | null;
   /**
-   * Small label above the title. Leave empty to hide.
+   * Build the case body by stacking blocks in the order they should read.
    */
-  introEyebrow?: string | null;
-  /**
-   * Use *word* for orange.
-   */
-  introTitle?: string | null;
-  introBody?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  processSteps?:
-    | {
-        /**
-         * Ex: 01
-         */
-        number?: string | null;
-        title?: string | null;
-        description?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  gallery?:
-    | {
-        image: number | Media;
-        label?: string | null;
-        accent?: ('blue' | 'orange') | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * The strong lead sentence, rendered large. Leave empty to skip.
-   */
-  quoteHighlight?: string | null;
-  /**
-   * The testimonial body, always at reading size.
-   */
-  quoteText?: string | null;
-  quoteAuthor?: string | null;
-  quoteRole?: string | null;
-  stats?:
-    | {
-        /**
-         * Ex: +38%
-         */
-        value?: string | null;
-        /**
-         * Ex: Average ticket after redesign
-         */
-        label?: string | null;
-        id?: string | null;
-      }[]
+  content?:
+    | (
+        | {
+            layout?: ('two' | 'one') | null;
+            eyebrow?: string | null;
+            /**
+             * Wrap a word in *asterisks* to accent it.
+             */
+            title?: string | null;
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'caseText';
+          }
+        | {
+            steps?:
+              | {
+                  /**
+                   * Ex: 01
+                   */
+                  number?: string | null;
+                  title?: string | null;
+                  description?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'caseTimeline';
+          }
+        | {
+            items?:
+              | {
+                  image?: (number | null) | Media;
+                  label?: string | null;
+                  accent?: ('blue' | 'orange') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'caseGallery';
+          }
+        | {
+            /**
+             * The strong lead sentence, rendered large. Leave empty to skip.
+             */
+            highlight?: string | null;
+            /**
+             * The testimonial body, always at reading size.
+             */
+            text?: string | null;
+            author?: string | null;
+            role?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'caseQuote';
+          }
+        | {
+            stats?:
+              | {
+                  /**
+                   * Ex: 90+
+                   */
+                  value?: string | null;
+                  label?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'caseStats';
+          }
+      )[]
     | null;
   stack?:
     | {
@@ -1481,36 +1507,70 @@ export interface PortfoliosSelect<T extends boolean = true> {
   deliverables?: T;
   duration?: T;
   since?: T;
-  introLayout?: T;
-  introEyebrow?: T;
-  introTitle?: T;
-  introBody?: T;
-  processSteps?:
+  content?:
     | T
     | {
-        number?: T;
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  gallery?:
-    | T
-    | {
-        image?: T;
-        label?: T;
-        accent?: T;
-        id?: T;
-      };
-  quoteHighlight?: T;
-  quoteText?: T;
-  quoteAuthor?: T;
-  quoteRole?: T;
-  stats?:
-    | T
-    | {
-        value?: T;
-        label?: T;
-        id?: T;
+        caseText?:
+          | T
+          | {
+              layout?: T;
+              eyebrow?: T;
+              title?: T;
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
+        caseTimeline?:
+          | T
+          | {
+              steps?:
+                | T
+                | {
+                    number?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseGallery?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    image?: T;
+                    label?: T;
+                    accent?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        caseQuote?:
+          | T
+          | {
+              highlight?: T;
+              text?: T;
+              author?: T;
+              role?: T;
+              id?: T;
+              blockName?: T;
+            };
+        caseStats?:
+          | T
+          | {
+              stats?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
       };
   stack?:
     | T
