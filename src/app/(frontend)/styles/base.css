@@ -23,6 +23,10 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     color: var(--color-ink);
+    /* Headings come from the CMS, so their longest word is not ours to control.
+       The fluid type scale keeps normal words inside the viewport; this is the
+       last-resort guard that stops an unusually long one from widening the page. */
+    overflow-wrap: break-word;
   }
 
   h1 {

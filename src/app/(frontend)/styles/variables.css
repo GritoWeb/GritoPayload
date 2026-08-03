@@ -53,12 +53,16 @@
 
   /* ── Type scale ────────────────────────────────────────── */
 
-  --text-display: 5.5rem;
+  /* The two display sizes scale with the viewport. They keep their original
+     value on wide screens — the clamp only bites on small ones, where a fixed
+     56px heading made a single fifteen-letter word wider than the screen and
+     pushed the whole page into horizontal scroll. */
+  --text-display: clamp(2.5rem, 1.5rem + 4.4vw, 5.5rem);
   --text-display--line-height: 1.02;
   --text-display--letter-spacing: -0.01em;
   --text-display--font-weight: 900;
 
-  --text-h1: 3.5rem;
+  --text-h1: clamp(2rem, 1.2rem + 3.4vw, 3.5rem);
   --text-h1--line-height: 1.05;
   --text-h1--letter-spacing: -0.005em;
   --text-h1--font-weight: 900;
