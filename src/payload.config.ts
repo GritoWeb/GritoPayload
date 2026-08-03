@@ -21,6 +21,7 @@ import { Portfolios } from './collections/Portfolios'
 import { PortfolioTags } from './collections/PortfolioTags'
 import { Posts } from './collections/Posts'
 import { Tags } from './collections/Tags'
+import { revalidateAll } from './endpoints/revalidateAll'
 import { HeaderGlobal } from './Header/config'
 import { FooterGlobal } from './Footer/config'
 
@@ -86,6 +87,8 @@ export default buildConfig({
     user: Users.slug,
     components: {
       providers: ['@/components/admin/BlockScrollProvider#default'],
+      // Renders in the admin header, so it is reachable from every screen.
+      actions: ['@/components/admin/ClearCacheButton#default'],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -100,6 +103,7 @@ export default buildConfig({
     fallback: true,
   },
   collections: [Users, Media, Pages, Portfolios, PortfolioTags, Posts, Tags],
+  endpoints: [revalidateAll],
   globals: [HeaderGlobal, FooterGlobal],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
