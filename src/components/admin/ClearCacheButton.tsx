@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button, toast } from '@payloadcms/ui'
+import { Button, toast, useLocale } from '@payloadcms/ui'
 
 /**
  * Header action that drops every cached page and CMS query.
@@ -14,8 +14,30 @@ import { Button, toast } from '@payloadcms/ui'
  * Styling comes from Payload's own Button and toast so it sits in the header
  * like a native control rather than a bolted-on one.
  */
+
+// Follows the content locale picked in the header, which is the only language
+// switch this panel exposes: `i18n` is not configured, so Payload's own chrome
+// is English-only and its `language` would always read `en`.
+const COPY = {
+  en: {
+    idle: 'Clear cache',
+    working: 'Clearing…',
+    success: 'Cache cleared. The site is now showing the latest content.',
+    failure: 'Could not clear the cache. Please try again.',
+  },
+  pt: {
+    idle: 'Limpar cache',
+    working: 'Limpando…',
+    success: 'Cache limpo. O site já está mostrando o conteúdo mais recente.',
+    failure: 'Não foi possível limpar o cache. Tente novamente.',
+  },
+} as const
+
 export default function ClearCacheButton() {
   const [isWorking, setIsWorking] = useState(false)
+  const locale = useLocale()
+
+  const copy = locale?.code?.startsWith('pt') ? COPY.pt : COPY.en
 
   const clear = async () => {
     if (isWorking) return
@@ -28,12 +50,12 @@ export default function ClearCacheButton() {
       })
 
       if (response.ok) {
-        toast.success('Cache cleared — the next visit rebuilds from the database.')
+        toast.success(copy.success)
       } else {
-        toast.error('Could not clear the cache. Try again.')
+        toast.error(copy.failure)
       }
     } catch {
-      toast.error('Could not clear the cache. Try again.')
+      toast.error(copy.failure)
     } finally {
       setIsWorking(false)
     }
@@ -45,9 +67,9 @@ export default function ClearCacheButton() {
       size="small"
       onClick={clear}
       disabled={isWorking}
-      aria-label="Clear the site cache"
+      aria-label={copy.idle}
     >
-      {isWorking ? 'Clearing…' : 'Clear cache'}
+      {isWorking ? copy.working : copy.idle}
     </Button>
   )
 }
