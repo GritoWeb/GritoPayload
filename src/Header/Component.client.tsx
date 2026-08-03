@@ -74,7 +74,19 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
           aria-label="GritoWeb — home"
           className="no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 focus-visible:ring-offset-paper rounded-md"
         >
-          <Image src="/favicon.png" alt="GritoWeb" width={512} height={512} className="h-11 w-auto" />
+          {/* 128px asset for a 44px slot (covers 2x/3x screens). `unoptimized` skips
+              /_next/image: on Workers there is no sharp, so the optimizer returns the
+              source bytes unchanged and only adds a subrequest. */}
+          <Image
+            src="/logo.webp"
+            alt="GritoWeb"
+            width={128}
+            height={128}
+            sizes="44px"
+            priority
+            unoptimized
+            className="h-11 w-auto"
+          />
         </Link>
 
         {/* Desktop nav */}

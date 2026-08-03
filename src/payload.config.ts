@@ -28,7 +28,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
 
-const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
+// `realpath` returns undefined for argv entries that are not existing files, which
+// happens under `next start` — guard before calling into it or config evaluation
+// throws and every Payload-backed route 500s.
+const isCLI = process.argv.some((value) =>
+  realpath(value)?.endsWith(path.join('payload', 'bin.js')),
+)
 const isProduction = process.env.NODE_ENV === 'production'
 const isBuild = process.env.NEXT_PHASE === 'phase-production-build'
 

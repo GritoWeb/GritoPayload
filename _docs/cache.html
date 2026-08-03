@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parecer — cache do site</title>
+<style>
+  :root{
+    --bg:#faf9f7; --surface:#fff; --ink:#16150f; --ink-2:#605c53; --line:#e4e0d6;
+    --accent:#b4321e; --accent-soft:#fdf0ec;
+    --slow:#a32218; --slow-soft:#fdeeec; --fast:#1f6b46; --fast-soft:#e9f5ef;
+    --warn:#8a6100; --warn-soft:#fdf5e3;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --serif:"Iowan Old Style",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#131210;--surface:#1c1b18;--ink:#f2efe8;--ink-2:#a9a49a;--line:#302e29;
+      --accent:#f0765c;--accent-soft:#2b1a16;--slow:#f28b7d;--slow-soft:#2c1715;
+      --fast:#74d3a4;--fast-soft:#14261e;--warn:#e8bc5e;--warn-soft:#2a2213;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:54rem;margin:0 auto;padding:clamp(1.4rem,4vw,3.5rem) clamp(1rem,4vw,2.5rem) 5rem}
+
+  header.top{margin-bottom:2.2rem}
+  .kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;
+          color:var(--accent);margin:0 0 .8rem}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,1.2rem+2.8vw,3rem);
+     line-height:1.05;letter-spacing:-.02em;margin:0 0 1rem}
+  .meta{font-family:var(--mono);font-size:.73rem;color:var(--ink-2);
+        display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+  .meta b{color:var(--ink);font-weight:600}
+
+  h2{font-family:var(--serif);font-size:clamp(1.25rem,1rem+1.1vw,1.6rem);line-height:1.2;
+     margin:3rem 0 .5rem;padding-top:1.2rem;border-top:1px solid var(--line);font-weight:600}
+  h2 .num{font-family:var(--mono);font-size:.6em;color:var(--accent);margin-right:.55rem;
+          letter-spacing:.05em}
+  p{margin:.65rem 0}
+  a{color:var(--accent);text-underline-offset:2px}
+  code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);color:var(--accent);
+       padding:.1em .35em;border-radius:3px;word-break:break-word}
+
+  .verdict{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--fast);
+           border-radius:6px;padding:1.2rem 1.4rem;margin:0 0 1rem;font-size:1.02rem}
+  .verdict b{color:var(--fast)}
+  .verdict p{margin:0}
+
+  /* ── fluxo antes/depois ── */
+  .flow{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+        padding:1.2rem 1.3rem;margin:1.1rem 0}
+  .flow + .flow{margin-top:.8rem}
+  .flow-head{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .flow-head h3{margin:0;font-size:1rem;font-weight:650}
+  .flow-time{margin-left:auto;font-family:var(--mono);font-weight:700;font-size:1.05rem}
+  .flow.a{border-left:5px solid var(--slow)} .flow.a .flow-time{color:var(--slow)}
+  .flow.b{border-left:5px solid var(--fast)} .flow.b .flow-time{color:var(--fast)}
+  .steps{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;font-size:.83rem}
+  .step{background:var(--bg);border:1px solid var(--line);border-radius:20px;
+        padding:.3rem .8rem;white-space:nowrap}
+  .step.hit{background:var(--fast-soft);border-color:var(--fast);color:var(--fast);font-weight:650}
+  .step.miss{background:var(--slow-soft);border-color:var(--slow);color:var(--slow);font-weight:650}
+  .arr{color:var(--ink-2);font-size:.9rem}
+
+  .tablewrap{overflow-x:auto;margin:1.1rem 0;border:1px solid var(--line);border-radius:6px;
+             background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:30rem}
+  th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:.67rem;letter-spacing:.07em;text-transform:uppercase;
+     color:var(--ink-2);font-weight:600;background:var(--bg)}
+  tr:last-child td{border-bottom:none}
+  .n{font-family:var(--mono);white-space:nowrap}
+  .n.slow{color:var(--slow)} .n.fast{color:var(--fast);font-weight:650}
+  .gain{font-family:var(--mono);font-weight:700;color:var(--fast)}
+
+  .cols{display:grid;gap:.9rem;grid-template-columns:1fr;margin:1.1rem 0}
+  @media(min-width:40rem){.cols{grid-template-columns:1fr 1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+        padding:1.1rem 1.2rem;font-size:.9rem}
+  .card.pick{border-color:var(--fast);box-shadow:0 0 0 1px var(--fast) inset}
+  .card h3{margin:0 0 .6rem;font-size:.98rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  .card ul{padding-left:1.05rem;margin:.4rem 0}
+  .card li{margin:.22rem 0}
+
+  ol.pts{list-style:none;padding:0;counter-reset:p;margin:1rem 0}
+  ol.pts>li{counter-increment:p;background:var(--surface);border:1px solid var(--line);
+            border-radius:6px;padding:.85rem 1.1rem;margin:.6rem 0;font-size:.92rem}
+  ol.pts>li::before{content:counter(p,decimal-leading-zero);font-family:var(--mono);font-size:.68rem;
+                    color:var(--accent);font-weight:700;display:block;margin-bottom:.25rem}
+  ol.pts>li>b{display:block;margin-bottom:.2rem;font-size:.97rem}
+  .src{font-size:.78rem;color:var(--ink-2);margin-top:.4rem}
+
+  .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;
+       padding:.18em .5em;border-radius:3px;font-weight:700;white-space:nowrap}
+  .tag.fix{background:var(--warn-soft);color:var(--warn)}
+  .tag.ok{background:var(--fast-soft);color:var(--fast)}
+
+  .note{font-size:.85rem;color:var(--ink-2);border-left:2px solid var(--line);
+        padding-left:.9rem;margin:1rem 0}
+  footer.end{margin-top:3rem;padding-top:1.1rem;border-top:1px solid var(--line);
+             font-size:.78rem;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="kicker">Parecer técnico</p>
+  <h1>Cache do site GritoWeb</h1>
+  <div class="meta">
+    <span>Task <b>86ajuy1cp</b></span>
+    <span>Branch <b>feat/cms-query-cache</b></span>
+    <span>Revisor <b>Luis</b></span>
+    <span><b>03/08/2026</b></span>
+  </div>
+</header>
+
+<div class="verdict">
+  <p><b>Aprovado.</b> A abordagem está correta, é o padrão que a própria Payload recomenda, e medindo
+  o site de ponta a ponta ficou de <b>21× a 43× mais rápido</b>. Três ajustes pequenos antes do merge.</p>
+</div>
+
+<h2><span class="num">01</span>O que está sendo cacheado</h2>
+
+<p><b>O resultado da consulta ao CMS</b> — o conteúdo da página, não o HTML pronto.</p>
+
+<p>Quando alguém abre <code>/portfolio</code>, o site pergunta ao banco: “me dá os portfólios, com as
+imagens e as tags”. Essa resposta é <b>igual para todo visitante</b> e só muda quando alguém publica algo
+no admin — o que acontece talvez uma vez por semana. Hoje ela é remontada do zero a cada visita.</p>
+
+<h2><span class="num">02</span>Por que isso acelera</h2>
+
+<div class="flow a">
+  <div class="flow-head">
+    <h3>Hoje — toda visita, sempre</h3>
+    <span class="flow-time">1,33 s</span>
+  </div>
+  <div class="steps">
+    <span class="step">visitante</span><span class="arr">→</span>
+    <span class="step">worker</span><span class="arr">→</span>
+    <span class="step miss">consulta o banco</span><span class="arr">→</span>
+    <span class="step">monta a página</span><span class="arr">→</span>
+    <span class="step">entrega</span>
+  </div>
+</div>
+
+<div class="flow b">
+  <div class="flow-head">
+    <h3>Com a branch — da 2ª visita em diante</h3>
+    <span class="flow-time">0,03 s</span>
+  </div>
+  <div class="steps">
+    <span class="step">visitante</span><span class="arr">→</span>
+    <span class="step">worker</span><span class="arr">→</span>
+    <span class="step hit">pega pronto do cache</span><span class="arr">→</span>
+    <span class="step">monta a página</span><span class="arr">→</span>
+    <span class="step">entrega</span>
+  </div>
+</div>
+
+<p>A medição mostrou que <b>a ida ao banco era ~97% do tempo</b>. O resto — montar a página — sempre foi
+rápido. Por isso o ganho é tão grande: tirando a única etapa lenta, sobra quase nada.</p>
+
+<div class="note">
+  <b>E quando o conteúdo muda?</b> Ao publicar no admin, o cache daquela coleção é descartado na hora e a
+  próxima visita já vê o conteúdo novo. Preview e rascunho nunca são cacheados — continuam mostrando o
+  autosave. Há ainda um limite de 1 h como rede de segurança.
+</div>
+
+<h2><span class="num">03</span>A medição</h2>
+
+<p>Site rodando de verdade nas duas versões, com o conteúdo de produção, 8 requisições por rota.</p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Rota</th><th>Hoje</th><th>Com cache</th><th></th></tr></thead>
+  <tbody>
+    <tr><td><code>/portfolio</code></td><td class="n slow">1,326 s</td><td class="n fast">0,031 s</td><td class="gain">43×</td></tr>
+    <tr><td><code>/</code></td><td class="n slow">1,142 s</td><td class="n fast">0,035 s</td><td class="gain">33×</td></tr>
+    <tr><td><code>/en</code></td><td class="n slow">1,114 s</td><td class="n fast">0,035 s</td><td class="gain">32×</td></tr>
+    <tr><td><code>/blog</code></td><td class="n slow">0,975 s</td><td class="n fast">0,031 s</td><td class="gain">31×</td></tr>
+    <tr><td><code>/posts/por-que-wordpress</code></td><td class="n slow">0,573 s</td><td class="n fast">0,027 s</td><td class="gain">21×</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Um detalhe que vale notar: <b>na versão de hoje as 8 requisições dão exatamente o mesmo tempo</b>.
+A oitava visita custa igual à primeira — é a prova de que não existe cache nenhum. Com a branch, só a
+primeira visita paga o preço cheio.</p>
+
+<div class="note">
+  <b>Ressalva:</b> a medição é em ambiente local, onde o cache fica em disco. Em produção ele é lido pela
+  rede, então o número real deve ficar em torno de 100–200 ms em vez de 30 ms. Continua sendo uma ordem de
+  grandeza de diferença — a produção hoje responde em 1,4 s na home e 2,2 s no portfólio.
+</div>
+
+<h2><span class="num">04</span>As opções</h2>
+
+<div class="cols">
+  <div class="card">
+    <h3>Deixar como está</h3>
+    <ul>
+      <li><b>Ganha:</b> nada.</li>
+      <li><b>Custa:</b> segue em 1–2 s por visita.</li>
+      <li><b>Esforço:</b> —</li>
+    </ul>
+  </div>
+  <div class="card pick">
+    <h3>Mergear com 3 ajustes <span class="tag ok">recomendado</span></h3>
+    <ul>
+      <li><b>Ganha:</b> a tabela acima.</li>
+      <li><b>Custa:</b> 1 bucket + 1 banco novos, dentro do plano gratuito.</li>
+      <li><b>Risco:</b> baixo — reversível revertendo o commit.</li>
+      <li><b>Esforço:</b> ~2–3 h.</li>
+    </ul>
+  </div>
+</div>
+
+<h2><span class="num">05</span>Os 3 ajustes</h2>
+
+<ol class="pts">
+  <li>
+    <b><span class="tag fix">ajuste</span> Preencher o <code>database_id</code> do banco de cache</b>
+    Está commitado como <code>REPLACE_WITH_D1_CREATE_OUTPUT</code>. Precisa criar o banco e colar o ID
+    antes do merge — senão o cache sobe sem conseguir se invalidar, e a falha é silenciosa.
+    <div class="src">Onde: <code>wrangler.jsonc</code>, binding <code>NEXT_TAG_CACHE_D1</code></div>
+  </li>
+  <li>
+    <b><span class="tag fix">ajuste</span> Trocar o modo da fila de revalidação</b>
+    A config usa <code>queue: 'direct'</code>, e o próprio pacote avisa no build que esse modo não é
+    recomendado em produção. Hoje o impacto é pequeno, mas é melhor deixar alinhado com a recomendação.
+    <div class="src">Fonte: <a href="https://opennext.js.org/cloudflare/caching">OpenNext Cloudflare — Caching</a></div>
+  </li>
+  <li>
+    <b><span class="tag fix">ajuste</span> Ativar o cache regional</b>
+    Uma linha de configuração (<code>withRegionalCache</code>), sem infraestrutura nova: guarda uma cópia
+    no próprio ponto de presença da Cloudflare e evita uma consulta extra a cada acerto de cache.
+    <div class="src">Fonte: <a href="https://opennext.js.org/cloudflare/caching">OpenNext Cloudflare — Caching</a></div>
+  </li>
+</ol>
+
+<h2><span class="num">06</span>Outros pontos da revisão</h2>
+
+<ol class="pts">
+  <li>
+    <b><span class="tag ok">a favor</span> É o padrão oficial da Payload</b>
+    O template de site da própria Payload cacheia as consultas exatamente assim, com as mesmas ferramentas.
+    Não é caminho exótico.
+    <div class="src">Fonte:
+    <a href="https://github.com/payloadcms/payload/blob/main/templates/website/src/utilities/getGlobals.ts">template oficial da Payload</a> ·
+    <a href="https://payloadcms.com/docs/performance/overview">Payload — Performance</a></div>
+  </li>
+  <li>
+    <b><span class="tag ok">a favor</span> Conserta a invalidação do portfólio e do inglês</b>
+    Hoje publicar um case não avisa o site para atualizar, e as páginas em inglês nunca eram atualizadas.
+    A branch corrige os dois.
+    <div class="src">Onde: <code>src/collections/Portfolios/hooks/revalidatePortfolio.ts</code> (novo)</div>
+  </li>
+  <li>
+    <b>O bucket no R2 é a escolha certa</b>
+    A documentação recomenda R2 e desaconselha a alternativa (KV), que pode servir dado desatualizado.
+    E ele é um bucket separado do de mídia, o que evita confundir os scripts de sincronização.
+    <div class="src">Fonte: <a href="https://opennext.js.org/cloudflare/caching">OpenNext Cloudflare — Caching</a></div>
+  </li>
+  <li>
+    <b>Custo não é fator</b>
+    Leitura no R2 custa US$ 0,36 por milhão, com 10 milhões grátis por mês; o banco dá 5 milhões de
+    leituras por dia no plano gratuito. O site não chega perto disso. O argumento a favor é velocidade,
+    não economia.
+    <div class="src">Fonte: <a href="https://developers.cloudflare.com/r2/pricing/">R2 pricing</a> ·
+    <a href="https://developers.cloudflare.com/d1/platform/pricing/">D1 pricing</a></div>
+  </li>
+  <li>
+    <b>Oportunidade fácil que ficou de fora: o sitemap</b>
+    O <code>sitemap.xml</code> continua consultando o banco a cada acesso, sem cache. Os hooks até tentam
+    invalidá-lo, mas ele nunca foi cacheado. Dá para incluir no mesmo mecanismo.
+    <div class="src">Onde: <code>src/app/sitemap.ts</code></div>
+  </li>
+  <li>
+    <b>Detalhe de segurança na rota de limpeza</b>
+    <code>/api/revalidate</code> aceita o segredo pela URL, que fica registrado em logs. Aceitar só pelo
+    cabeçalho resolve, sem custo.
+    <div class="src">Onde: <code>src/app/api/revalidate/route.ts</code></div>
+  </li>
+</ol>
+
+<h2><span class="num">07</span>Respostas ao card</h2>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Pergunta</th><th>Resposta</th></tr></thead>
+  <tbody>
+    <tr><td>A abordagem está correta?</td>
+        <td><b>Sim.</b> É o padrão recomendado pela Payload e pela Cloudflare.</td></tr>
+    <tr><td>R2 é a camada certa, ou KV / Cache API seriam melhores?</td>
+        <td>R2. KV é desaconselhado por poder servir dado desatualizado. A Cache API entra <b>somando</b>
+        ao R2 (ajuste 3), não no lugar dele.</td></tr>
+    <tr><td>Estratégia de invalidação</td>
+        <td>Correta, e melhor que a de hoje. Publicar no admin limpa na hora; há limite de 1 h como rede
+        de segurança; e existe uma rota de limpeza manual para o conteúdo enviado em massa.</td></tr>
+    <tr><td>O que exatamente é cacheado?</td>
+        <td><b>A consulta ao CMS.</b> O HTML continua sendo montado a cada visita — mas isso é a parte
+        rápida.</td></tr>
+    <tr><td>Impacto em custo e latência</td>
+        <td>Custo irrelevante. Latência: 21× a 43× mais rápido nas visitas seguintes.</td></tr>
+    <tr><td>Estimativa se aprovado</td>
+        <td>~2–3 h, incluindo os 3 ajustes e a verificação depois do deploy.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer class="end">
+  <p>Método: revisão da branch <code>feat/cms-query-cache</code> contra a <code>main</code>; medição com o
+  site rodando nas duas versões, com conteúdo de produção, 8 requisições por rota; conferência das
+  afirmações contra a documentação oficial de Payload, Next.js e Cloudflare. Nenhuma alteração foi feita
+  em produção.</p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -8,8 +8,23 @@ const cookieOptions = {
   sameSite: 'lax' as const,
 }
 
+// Uploads are served by Payload's REST route, which is `force-dynamic`, so Next
+// stamps the browser-facing response with `no-store`. Setting the header here
+// still matters: the image optimiser fetches the upload internally, sees a
+// cacheable upstream, and gives the optimised variant a long-lived cache — which
+// is how the vast majority of images on the site are delivered. Upload filenames
+// are stable per file, so the bytes behind a URL never change.
+const UPLOAD_PATH = '/api/media/file/'
+const UPLOAD_CACHE_CONTROL = 'public, max-age=31536000, immutable'
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (pathname.startsWith(UPLOAD_PATH)) {
+    const response = NextResponse.next()
+    response.headers.set('Cache-Control', UPLOAD_CACHE_CONTROL)
+    return response
+  }
 
   // Skip Payload admin, API, and static assets
   if (
