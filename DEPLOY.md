@@ -134,13 +134,60 @@ após o primeiro deploy (ou sempre que recriar a tabela).
 
 ---
 
+## Cache (data cache / ISR)
+
+As páginas públicas rodam SSR no worker, mas as consultas ao D1 (páginas, posts,
+portfólios e as listagens) são cacheadas no **data cache** do Next (`unstable_cache`),
+que o OpenNext persiste no **R2** e invalida via **tag cache** no **D1**. Resultado:
+o banco só é consultado quando o conteúdo muda, não a cada visita.
+
+- **Invalidação automática:** os hooks `afterChange`/`afterDelete` das collections
+  chamam `revalidateTag(...)` no publish → a página reflete na hora. Preview/draft
+  nunca é cacheado.
+- **Backstop:** TTL de 1h (`CACHE_TTL` em `src/lib/cacheTags.ts`) que autocorrige
+  conteúdo subido por `pnpm sync:prod` (que escreve direto no D1, **sem** passar pelos hooks).
+- **Purge manual:** `POST /api/revalidate` protegido por `REVALIDATE_SECRET`
+  (ver `.env.example`). Use após um `sync:prod` para refletir na hora em vez de esperar o TTL:
+  ```bash
+  # purga tudo
+  curl -X POST "$BASE_URL/api/revalidate?secret=$REVALIDATE_SECRET"
+  # purga uma rota / uma tag
+  curl -X POST "$BASE_URL/api/revalidate?secret=$REVALIDATE_SECRET&path=/portfolio/acme"
+  curl -X POST "$BASE_URL/api/revalidate?secret=$REVALIDATE_SECRET&tag=posts"
+  ```
+
+> ⚠️ O cache **só** atua sob `pnpm preview`/`pnpm deploy` (runtime OpenNext). Em
+> `pnpm dev` o Next usa o cache em memória padrão — os bindings de cache são ignorados.
+
+### Provisionamento (uma vez, antes do primeiro deploy com cache)
+
+Os stores de cache são **dedicados** (separados do D1/R2 do Payload) para não
+interferir no `sync`. Crie-os e cole o `database_id` no `wrangler.jsonc`:
+
+```bash
+# Bucket R2 para o incremental cache (binding NEXT_INC_CACHE_R2_BUCKET)
+wrangler r2 bucket create grito-web-next-cache
+
+# Banco D1 para o tag cache (binding NEXT_TAG_CACHE_D1)
+wrangler d1 create grito-web-next-tag-cache
+# → copie o database_id retornado para o campo "REPLACE_WITH_D1_CREATE_OUTPUT" em wrangler.jsonc
+```
+
+A tabela `revalidations` do tag cache é criada automaticamente no deploy pelo
+`opennextjs-cloudflare` (populateCache) — não precisa criar à mão. Defina também
+`REVALIDATE_SECRET` no ambiente do worker (`wrangler secret put REVALIDATE_SECRET`).
+
+---
+
 ## Estrutura de recursos na Cloudflare
 
 | Recurso | Nome | Binding |
 |---|---|---|
 | Worker | `grito-web` | — |
-| Banco D1 | `cloudflare-payload-db` | `D1` |
-| Storage R2 | `cloudflare-payload-r2` | `R2` |
+| Banco D1 (conteúdo) | `cloudflare-payload-db` | `D1` |
+| Storage R2 (mídia) | `cloudflare-payload-r2` | `R2` |
+| R2 (cache incremental) | `grito-web-next-cache` | `NEXT_INC_CACHE_R2_BUCKET` |
+| D1 (tag cache) | `grito-web-next-tag-cache` | `NEXT_TAG_CACHE_D1` |
 
 **URL de produção:** https://grito-web.suporte-fd8.workers.dev
 

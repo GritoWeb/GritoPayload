@@ -3,15 +3,16 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 import { CACHE_TAGS } from '../../../lib/cacheTags'
-import type { Post } from '../../../payload-types'
+import type { Portfolio } from '../../../payload-types'
 
-// One post doc backs both locale routes: /posts/<slug> (pt) and /en/posts/<slug>.
+// One portfolio doc backs both locale case routes:
+// /portfolio/<slug> (pt) and /en/portfolio/<slug>.
 const pathsForSlug = (slug?: string | null): string[] => [
-  `/posts/${slug}`,
-  `/en/posts/${slug}`,
+  `/portfolio/${slug}`,
+  `/en/portfolio/${slug}`,
 ]
 
-export const revalidatePost: CollectionAfterChangeHook<Post> = ({
+export const revalidatePortfolio: CollectionAfterChangeHook<Portfolio> = ({
   doc,
   previousDoc,
   req: { payload, context },
@@ -19,29 +20,32 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
       for (const path of pathsForSlug(doc.slug)) {
-        payload.logger.info(`Revalidating post at path: ${path}`)
+        payload.logger.info(`Revalidating portfolio at path: ${path}`)
         revalidatePath(path)
       }
-      revalidateTag('posts-sitemap')
-      revalidateTag(CACHE_TAGS.posts)
+      revalidateTag('portfolios-sitemap')
+      revalidateTag(CACHE_TAGS.portfolios)
     }
 
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
       for (const path of pathsForSlug(previousDoc.slug)) {
-        payload.logger.info(`Revalidating old post at path: ${path}`)
+        payload.logger.info(`Revalidating old portfolio at path: ${path}`)
         revalidatePath(path)
       }
-      revalidateTag('posts-sitemap')
-      revalidateTag(CACHE_TAGS.posts)
+      revalidateTag('portfolios-sitemap')
+      revalidateTag(CACHE_TAGS.portfolios)
     }
   }
   return doc
 }
 
-export const revalidateDelete: CollectionAfterDeleteHook<Post> = ({ doc, req: { context } }) => {
+export const revalidatePortfolioDelete: CollectionAfterDeleteHook<Portfolio> = ({
+  doc,
+  req: { context },
+}) => {
   if (!context.disableRevalidate) {
     for (const path of pathsForSlug(doc?.slug)) revalidatePath(path)
-    revalidateTag('posts-sitemap')
+    revalidateTag('portfolios-sitemap')
   }
   return doc
 }

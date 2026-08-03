@@ -1,4 +1,5 @@
 import React from 'react'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import type { LatestPortfoliosBlock, Portfolio, Media, PortfolioTag } from '@/payload-types'
@@ -7,6 +8,53 @@ import { Button } from '@/components/Button'
 import { parseTitle } from '@/utilities/parseTitle'
 import { titleMaxWidthClass, type TitleMaxWidth } from '@/utilities/titleMaxWidthClass'
 import { ArrowIcon } from '@/components/ui/ArrowIcon'
+import { CACHE_TAGS, CACHE_TTL } from '@/lib/cacheTags'
+
+// Latest 3 published portfolios — same for everyone, so persisted in the data
+// cache and invalidated by the Portfolios publish hook.
+const getLatestPortfolios = unstable_cache(
+  async (): Promise<PortfolioItem[]> => {
+    const payload = await getPayload({ config: configPromise })
+
+    const result = await payload.find({
+      collection: 'portfolios',
+      depth: 1,
+      limit: 3,
+      overrideAccess: false,
+      sort: '-publishedAt',
+      select: {
+        title: true,
+        slug: true,
+        client: true,
+        image: true,
+        tag: true,
+        tagVariant: true,
+        accent: true,
+        result: true,
+      },
+    })
+
+    return (result.docs as Portfolio[]).map((p) => {
+      const image = p.image && typeof p.image === 'object' ? (p.image as Media) : null
+      const tag = p.tag && typeof p.tag === 'object' ? (p.tag as PortfolioTag) : null
+
+      return {
+        id: String(p.id),
+        title: p.title,
+        slug: p.slug,
+        client: p.client ?? null,
+        result: p.result ?? null,
+        tagId: tag ? String(tag.id) : null,
+        tagLabel: tag?.title ?? null,
+        tagVariant: (p.tagVariant as 'blue' | 'orange') ?? 'blue',
+        accent: (p.accent as 'blue' | 'orange') ?? 'blue',
+        image,
+      }
+    })
+  },
+  ['latest-portfolios'],
+  { tags: [CACHE_TAGS.portfolios], revalidate: CACHE_TTL },
+)
 
 export const LatestPortfoliosComponent: React.FC<LatestPortfoliosBlock> = async ({
   eyebrow,
@@ -15,43 +63,7 @@ export const LatestPortfoliosComponent: React.FC<LatestPortfoliosBlock> = async 
   buttonLabel,
   buttonHref,
 }) => {
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'portfolios',
-    depth: 1,
-    limit: 3,
-    overrideAccess: false,
-    sort: '-publishedAt',
-    select: {
-      title: true,
-      slug: true,
-      client: true,
-      image: true,
-      tag: true,
-      tagVariant: true,
-      accent: true,
-      result: true,
-    },
-  })
-
-  const portfolios: PortfolioItem[] = (result.docs as Portfolio[]).map((p) => {
-    const image = p.image && typeof p.image === 'object' ? (p.image as Media) : null
-    const tag = p.tag && typeof p.tag === 'object' ? (p.tag as PortfolioTag) : null
-
-    return {
-      id: String(p.id),
-      title: p.title,
-      slug: p.slug,
-      client: p.client ?? null,
-      result: p.result ?? null,
-      tagId: tag ? String(tag.id) : null,
-      tagLabel: tag?.title ?? null,
-      tagVariant: (p.tagVariant as 'blue' | 'orange') ?? 'blue',
-      accent: (p.accent as 'blue' | 'orange') ?? 'blue',
-      image,
-    }
-  })
+  const portfolios = await getLatestPortfolios()
 
   return (
     <section className="px-5 section-y">

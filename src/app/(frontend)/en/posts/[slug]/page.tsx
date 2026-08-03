@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { PostSinglePage, postMetadata } from '@/components/pages/PostSingle'
 
-export const dynamic = 'force-dynamic'
-
 type Args = { params: Promise<{ slug: string }> }
 
 export function generateMetadata(args: Args): Promise<Metadata> {

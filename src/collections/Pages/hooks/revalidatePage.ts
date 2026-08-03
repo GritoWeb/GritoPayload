@@ -2,7 +2,15 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 
+import { CACHE_TAGS } from '../../../lib/cacheTags'
 import type { Page } from '../../../payload-types'
+
+// A single page doc backs both locale routes, so revalidate pt AND en.
+// pt lives at the root ("/", "/about"); en is prefixed ("/en", "/en/about").
+const pathsForSlug = (slug?: string | null): string[] => {
+  if (slug === 'home') return ['/', '/en']
+  return [`/${slug}`, `/en/${slug}`]
+}
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   doc,
@@ -11,21 +19,22 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 }) => {
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
-      const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
-
-      payload.logger.info(`Revalidating page at path: ${path}`)
-
-      revalidatePath(path)
+      for (const path of pathsForSlug(doc.slug)) {
+        payload.logger.info(`Revalidating page at path: ${path}`)
+        revalidatePath(path)
+      }
       revalidateTag('pages-sitemap')
+      revalidateTag(CACHE_TAGS.pages)
     }
 
+    // Page was unpublished — drop its old cached routes.
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
-      const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
-
-      payload.logger.info(`Revalidating old page at path: ${oldPath}`)
-
-      revalidatePath(oldPath)
+      for (const path of pathsForSlug(previousDoc.slug)) {
+        payload.logger.info(`Revalidating old page at path: ${path}`)
+        revalidatePath(path)
+      }
       revalidateTag('pages-sitemap')
+      revalidateTag(CACHE_TAGS.pages)
     }
   }
   return doc
@@ -33,8 +42,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
 export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) {
-    const path = doc?.slug === 'home' ? '/' : `/${doc?.slug}`
-    revalidatePath(path)
+    for (const path of pathsForSlug(doc?.slug)) revalidatePath(path)
     revalidateTag('pages-sitemap')
   }
 
