@@ -61,7 +61,14 @@ export function FadeInImage({ className, alt, onLoad, priority, ...props }: Imag
     return () => observer.disconnect()
   }, [priority])
 
-  const merged = ['fade-in-img', inView && loaded && 'is-visible', className].filter(Boolean).join(' ')
+  // Priority images are the LCP candidate: they sit above the fold, so the fade
+  // buys nothing and costs everything. `.fade-in-img` starts at `opacity: 0` and
+  // only clears once React has hydrated, and an invisible pixel does not count as
+  // painted — which parked LCP behind a full hydration cycle (measured: 3.4s of
+  // render delay against 125ms of actual download).
+  const merged = priority
+    ? className
+    : ['fade-in-img', inView && loaded && 'is-visible', className].filter(Boolean).join(' ')
 
   return (
     <Image

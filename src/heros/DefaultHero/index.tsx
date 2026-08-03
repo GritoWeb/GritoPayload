@@ -48,7 +48,11 @@ export const DefaultHero: React.FC<Page['hero']> = ({
         }
         media={
           media && typeof media !== 'string' ? (
-            <div className="relative">
+            // The width constraint belongs on the wrapper, not the image. With it
+            // on the image, `w-full` resolved against a shrink-to-fit parent that
+            // had nothing to size itself from until the file arrived, so the box
+            // stayed collapsed and everything below jumped once it loaded.
+            <div className="relative w-full max-w-[480px]">
               <Sparkle size={38} color="#282828" className="absolute top-5 right-12 animate-fade-in" />
               <Sparkle size={24} color="#FE9D2B" className="absolute bottom-14 left-2.5 animate-fade-in" />
               <FadeInImage
