@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-07
+
+### Removed
+
+- **Botão "Enviar outra" do painel de sucesso do formulário de contato**
+  (`src/blocks/ContactSection/Component.tsx`). Depois de enviar, o bloco mostrava um botão que
+  resetava o formulário e permitia disparar outra mensagem na mesma visita — comportamento indesejado
+  para um formulário de contato, que deve encerrar o fluxo no envio. Removido o botão e, junto,
+  o handler `handleReset` que existia só para ele (ficaria como código morto).
+  Verificado: `npx tsc --noEmit` sem erros no arquivo e `npx eslint` sem apontamentos; o painel de
+  sucesso segue renderizando ícone, `successTitle` e `successMessage` vindos do CMS.
+
+  Pendente relacionado, ainda **não** implementado: o envio de fato. Hoje
+  `src/blocks/ContactSection/actions.ts` é um stub (`void data; return { ok: true }`) que descarta os
+  dados, e `handleSubmit` marca sucesso no `finally` — ou seja, o usuário vê "Mensagem enviada" mesmo
+  quando nada é enviado. A integração com Resend e a correção desse `finally` entram numa mudança
+  separada.
+
 ## 2026-07-28
 
 ### Fixed

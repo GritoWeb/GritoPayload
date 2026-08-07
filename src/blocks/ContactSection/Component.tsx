@@ -218,11 +218,6 @@ export const ContactSectionComponent: React.FC<ContactSectionBlock> = ({
     }
   }
 
-  const handleReset = () => {
-    setSent(false)
-    setForm(emptyForm)
-  }
-
   return (
     <section className="px-5 section-y">
       {(eyebrow || heading) && (
@@ -245,9 +240,6 @@ export const ContactSectionComponent: React.FC<ContactSectionBlock> = ({
               </div>
               <h3 className="m-0 text-blue text-[26px] font-bold">{successTitle}</h3>
               <p className="mt-2.5 text-ink-soft max-w-sm">{successMessage}</p>
-              <Button variant="ghost" className="mt-6" onClick={handleReset}>
-                Enviar outra
-              </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-7" noValidate>
